@@ -8,7 +8,7 @@ Cette carte de référence est destinée à accompagner l'étudiant durant ses �
 
 La carte de référence est une feuille A4 recto-verso supposément imprimée sur du papier cartonné bleu :
 
-[![Preview](https://imgur.com/qBt5L1a.jpg)](https://github.com/heig-vd-tin/refcard/releases/latest/download/refcard-cpp.pdf)
+[![Preview](https://imgur.com/OB9Vi4M.jpg)](https://github.com/heig-tin-info/refcard-cpp/releases/latest/download/refcard-cpp.pdf)
 
 ## Build
 
