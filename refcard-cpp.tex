@@ -33,15 +33,19 @@
   showspaces=false,
   showtabs=true,
   tabsize=3,
+  upquote=true,
   columns=fullflexible,
+  aboveskip=0.5ex,belowskip=0.5ex,
   escapeinside={(*}{*)}
 }
 
 % Configuration
 \renewcommand{\familydefault}{\sfdefault}
 
+% Titles and paragraphs more compact
 \sectionfont{\fontsize{12}{15}\selectfont}
 \subsectionfont{\fontsize{10}{12}\selectfont}
+\subsubsectionfont{\fontsize{7}{9}\selectfont}
 
 \allsectionsfont{\sffamily\underline}
 
@@ -49,8 +53,9 @@
 \pagenumbering{gobble}
 
 % Titles and paragraphs more compact
-\titlespacing*{\section}{0pt}{0pt}{0pt}
-\titlespacing*{\subsection}{0pt}{0pt}{0pt}
+\titlespacing*{\section}{0pt}{0ex}{0ex}
+\titlespacing*{\subsection}{0pt}{0ex}{0ex}
+\titlespacing*{\subsubsection}{0pt}{0ex}{0ex}
 
 \newlength\mybaselinestretch
 \mybaselinestretch=0pt plus 0.02pt\relax
@@ -77,9 +82,7 @@
 \end{center}
 
 Cette carte de référence peut être utilisée durant les travaux écrits et examens
-des cours \emph{progoo} et \emph{progoox} à moins que le contraire soit explicitement formulé.
-Elle est une liste non exhaustive des possibilités du langage C++. Elle est un complément à la carte
-de référence du langage C.
+des cours \emph{progoo} et \emph{progoox} à moins que le contraire ne soit explicitement formulé.
 
 Ce travail est inspiré de \emph{Learn X in Y} et de la carte de référence de Matt Mahoney.
 
@@ -104,32 +107,12 @@ Signification des termes utilisés dans cette carte de référence.
 \section*{Différences C/C++}
 \begin{lstlisting}
 sizeof('c') == sizeof(char) == 1 // Différence par rapport au C
-void func(); // func n'accepte aucun arguments
-int *ip = nullptr; // Utiliser à la place de NULL
-#include <cstdio> // Au lieu de <stdio.h> (pas de suffix .h)
-\end{lstlisting}
-
-\section*{Généralités}
-
-\begin{lstlisting}
-// Surcharge de fonctions
-void say(char const* s) { printf("%s\n", s); }
-void say(int u) { printf("%d\n", u); }
-void main() {
-   say("Hello");
-   say(15);
-}
-
-// Arguments par défaut
-void foo(int a = 1; int b = 4) { ... }
-void main() {
-   foo();      // a = 1, b = 4
-   foo(20);    // a = 20, b = 4
-   foo(20, 5); // a = 20, b = 5
-}
-
-for(auto x; iterable)   // Boucle itérative sur itérable
-int& r = x;             // Référence r sur x
+void func();                     // func n'accepte aucun arguments
+int *ip = nullptr;               // Utiliser à la place de NULL
+#include <cstdio>                // Remplace <stdio.h> (pas de .h)
+int& r = x;                      // Référence r sur x
+using Alias=long int;            // Substitut à typedef
+for (auto x; iterable);          // Boucle itérative sur itérable
 \end{lstlisting}
 
 \section*{Entrées sorties}
@@ -140,9 +123,10 @@ using namespace std; // Les streams dans l'espace de nom std
 int main() {
    int i;
    cout << "Enter your favorite number:\n");
-   cin >> i;
+   cin >> i; // Lecture de i sur l'entrée standard
    cout << "Your favorite number is " << i << "\n";
    cerr << "An error message" << endl;
+   clog << "Standard logging stream, équivalent à cerr\n"
 }
 \end{lstlisting}
 
@@ -150,30 +134,58 @@ int main() {
 
 \begin{lstlisting}
 #include <string>
-
 string a = "Hello", b = "World";
-cout << a + b; // "Hello World"
-cout << a + " You"; // "Hello You"
-a.append(" Dog"); // En C++ les chaînes sont modifiables
-cout << a; // "Hello Dog"
+cout << a + b;                    // "Hello World"
+cout << a + " You";               // "Hello You"
+a.append(" Dog");                 // En C++ les chaînes sont modifiables
+cout << a;                        // "Hello Dog"
+
+// Buffer de string
+std::stringstream ss;
+ss << 100 << ' ' << 200 << ' ' << 300;
+int foo, bar;
+ss >> foo >> bar;                 // Lecture de 100 et 200
+std::string s = ss.str();         // Conversion en string
+s._cstr();                        // Conversion en char *
+
+// Manipulateurs (foo = 100)
+#include <iomanip>
+cout << "Dec = " << setbase(10) << foo << endl; // 100
+cout << "Hex = " << setbase(16) << foo << endl; // 64
+cout << setw(5) << foo << endl;        // Affiche "  100"
+cout << setfill('x') << foo << endl;   // Affiche "xx100"
+cout << setprecision(5) << pi << endl; // "3.1416"
+\end{lstlisting}
+
+\section*{Surcharge paramétrique}
+
+\begin{lstlisting}
+void say(char const* s) { printf("%s\n", s); }
+void say(int u) { printf("%d\n", u); }
+void main() { say("Hello"); say(15); }
+
+// Arguments par défaut
+void foo(int a = 1; int b = 4) { ... }
+void main() { foo(); /* a=1, b=4 */ foo(20); /* a=20, b=4 */
+              foo(20, 5); /* a=20, b=5 */ }
 \end{lstlisting}
 
 \section*{Références}
 
 \begin{lstlisting}
 string foo = "I am foo";
-string& fooRef = foo; // Référence sur foo
-fooRef += ". Hi!"; // Modifie foo via la référence
-cout << fooRef; // Affiche "I am foo. Hi!"
+string& fooRef = foo;       // Référence sur foo
+fooRef += ". Hi!";          // Modifie foo via la référence
+cout << fooRef;             // Affiche "I am foo. Hi!"
 
-cout << &fooRef << endl; // Affiche l'adresse de foo
+cout << &fooRef << endl;    // Affiche l'adresse de foo
 string bar = "I am bar";
 fooRef = bar;
-cout << &fooRef << endl; // Affiche toujours l'adresse de foo
-cout << fooRef; // Affiche "I am bar"
+cout << &fooRef << endl;    // Affiche toujours l'adresse de foo
+cout << fooRef;             // Affiche "I am bar"
 
 const string& barRef = bar;
-barRef += ". Hi!"; // Erreur !
+barRef += ". Hi!";          // Erreur !
 
 // Objets temporaires
 string foo() { ... }
@@ -185,69 +197,52 @@ void bar() {
 }
 
 string str;
-void func(string& s) { ... } // Référence standard
-void func(string&& s) { ... } // Référence temporaire
-func(str); // Référence standard
-func(foo()); // Référence temporaire
+void func(string& s) { ... }  // Référence standard
+void func(string&& s) { ... } // Référence temporaire (move semantics)
+func(str);                    // Référence standard
+func(foo());                  // Référence temporaire
 
 \end{lstlisting}
 
 \section*{Enumérations}
 
 \begin{lstlisting}
-enum AnimalTypes {
-    Mammals, Birds, Reptiles, Amphibians, Fish
+enum AnimalTypes { // Enumération style C, plain enum (à éviter)
+    Mammals, Birds, Reptiles, Amphibians, Fish // Mammals == 0
 };
 
-AnimalTypes GetAnimalType() {
+AnimalTypes GetAnimalType() { // S'utilise comme un type
     return AnimalTypes::REPTILES;
 }
 
-enum Amphibians : uint8_t {
-    Frogs, // 0
-    Newts, // 1
-    Salamanders = 42, // 42
-    Toads // 43
-}; // Peut être implicitement casté en uint8_t
+// Les valeurs seront 0,1,42,43, peut être implicitement casté en uint8_t
+enum Amphibians : uint8_t { Frogs, Newts, Salamanders=42, Toads};
 
-enum class Birds : uint8_t {
-    Chickens, Hummingbirds
-}; // Ne sera pas implicitement casté
+// Méthode privilégiée pour enum : ne sera pas implicitement casté
+enum class Birds : uint8_t { Chickens, Hummingbirds };
 \end{lstlisting}
 
 \section*{Templates}
-
+Type de polymorphisme paramétrique statique (à la compilation)
 \begin{lstlisting}
-template<class T>
-class Box {
-public:
-    void insert(const T&) { ... }
-};
+template<typename T>
+struct Box { void insert(const T&) { ... } };
+Box<int> intBox; intBox.insert(42);
 
-Box<int> intBox;
-intBox.insert(42);
-
-Box<Box<int> > boxOfBox;                // Template imbriquées
+Box<Box<int> > boxOfBox;  // Template imbriquées (espace après >)
 boxOfBox.insert(intBox);
 
-template <class T> T f(T t);            // Surcharge f pour tous les types
-template <class T> class X {            // Classe avec paramètre T
-   X(T t); };                           // Constructeur
-template <class T> X<T>::X(T t) {}      // Définition du constructeur
-X<int> x(3);                            // Un objet de type X de int
-template <class T, class U=T, int n=0>  // Template avec paramètres par défaults
+template <typename T> T f(T t);
+template <typename T> class X { X(T t); }; // Classe avec paramètre T
+template <typename T> X<T>::X(T t) {}      // Définition du constructeur
+X<int> x(3);                               // Un objet de type X de int
+template <typename T, class U=T, int n=0>  // Paramètres par défaults
 
-// Paramètres
-template<int Y>
-void printMessage() {
-   cout << "Your number is " << Y << endl;
-}
+// Une template peut aussi prendre des paramètres scalaires.
+template<int Y> void printMessage() { cout << "You want " << Y << endl; }
 
-// Spécialisation
-template<>
-void printMessage<42>() {
-   cout << "You said 42!" << endl;
-}
+// Spécialisation : crée un cas particulier pour la valeur 42.
+template<> void printMessage<42>() { cout << "You said 42!" << endl; }
 printMessage<23>(); // Your number is 23
 printMessage<42>(); // You said 42!
 
@@ -259,32 +254,27 @@ printMessage<42>(); // You said 42!
 extern "C" { void f(); }    // Si f() a été compilé dans un objet C
 namespace N { class T {}; } // Cache la classe T dans le namespace N
 N::T t;                     // Utilise le nom T du namespace N
-using namespace N;          // Rends T visible sans préfix N::
-
-using namespace std;        // Permet les appels standards sans std::
+using namespace N;          // Rends T visible sans le préfix 'N::'
+using namespace std;        // Permet les appels standards sans 'std::'
 
 namespace First {
     namespace Nested {
-        void foo() {
-            printf("This is First::Nested::foo\n");
-        }
+        void foo() { printf("This is First::Nested::foo\n"); }
     }
 }
 namespace Second {
-    void foo() {
-        printf("This is Second::foo\n");
-    }
+    void foo() { printf("This is Second::foo\n"); }
 }
 void foo() {
     printf("This is global foo\n");
 }
 
 int main() {
-    using namespace Second;
+    using namespace Second;    // Intègre Second au contexte local
     Second::foo();
     First::Nested::foo();
-    ::foo(); // Global foo
-    foo(); // Erreur car ambïgu
+    ::foo();                   // Global foo
+    foo();                     // Erreur car ambïgu
 }
 \end{lstlisting}
 
@@ -293,42 +283,44 @@ int main() {
 \begin{lstlisting}
 // Généralement déclaré dans un .h (ou .hpp)
 class Dog {
-    std::string name; // Privé par défaut (private:)
+    std::string name;     // Privé par défaut (private:)
     int weight;
-public:
-    Dog(); // Constructeur par défaut
+  public:                 // Accès possible par tous
+    Dog();                // Constructeur par défaut
+    Dog(Dog &other);      // Constructeur par copie
+
     void setName(const std::string& dogsName);
     void setWeight(int dogsWeight);
 
-    // Si marqué const, la méthode ne modifie pas l'état
-    // de l'objet.
+    // Si marqué const, la méthode ne modifie pas l'état de l'objet.
     virtual void print() const;
 
-    // Méthode définie dans le body d'une classe
+    // Méthode implémentée dans le body d'une classe
     void bark() const { std::cout << name << " barks!" << endl; }
 
     // Déstructeur doit être virtuel si peut être dérivé
     virtual ~Dog();
 
-protected:
-    // Accès possible aux classes dérivées
+  protected:               // Accès possible par les classes dérivées
+  private:                 // Accès impossible aux classes dérivées
+};                         // Ne pas oublier le point virgule !
 
-}
-
-// Déclaration implémentée dans un .cpp
-Dog::Dog() {
-    std::cout << "A dog has been constructed\n";
-}
-
-Dog::~Dog() {
-    std::cout << "Goodbye " << name << "\n";
-}
+// Déclarations implémentées dans un .cpp avec le préfix du namespace
+Dog::Dog() { cout << "Nouveau chien construit\n"; }
+Dog::~Dog() { cout << "Adieu " << name << "\n"; }
 
 int main() {
-    Dog myDog; // Affiche "A dog has been constructed"
+    Dog myDog; // Affiche "Nouveau chien construit"
     myDog.setName("Barkley");
     myDog.setWeight(10);
-} // Print "Goodbye Barkley"
+} // Affiche "Adieu Barkley"
+
+class C { // Classe abstraite
+    virtual void foo;                      // Méthode virtuelle
+    virtual bar = 0;                       // Méthode virtuelle pure
+    C() = default;                         // Valeur par défaut
+    const C& operator=(C &other) = delete; // Affectation supprimée
+};
 \end{lstlisting}
 
 \section*{Héritage et polymorphisme}
@@ -375,7 +367,17 @@ catch (...) {
 }
 \end{lstlisting}
 
-\section*{Conteneurs de données}
+\section*{STL}
+
+\subsection*{Conteneurs de données séquentiels}
+
+\begin{lstlisting}
+array // Tableau statique contigus
+vector // Tableau dynamique O(1) amorti à l'insertion
+deque // Queue double (double-ended queue)
+forward_list // Liste chaînée simple
+list // Liste chaînée double
+\end{lstlisting}
 
 \subsection*{Vector}
 
@@ -390,6 +392,10 @@ vect.pop_back(val);  // Enlève à la fin
 vect.insert(iterator position, const value_type &val);
 vect.erase(iterator position); // Efface une position
 vect.erase(iterator first, iterator last); // Efface un intervalle
+vect[i]; // Position i
+vect.front(); vect.back() // Accès des extrémités
+vect.empty(); // Vide ?
+vect.capacity(); // Taille du vecteur
 
 \end{lstlisting}
 
@@ -484,48 +490,80 @@ void S::f(int i) {
     [&, i]{};      // Ok
     [&, &i]{};     // Erreur : i précédé par & quand & est le défaut
     [=, this]{};   // Erreur : this quand = est défaut
-    [=, *this]{ }; // OK
+    [=, *this]{};  // OK
     [i, i]{};      // Erreur : i répété
+
+    [&]{};         // Capture le contexte parent par référence
+    [=]{};         // Capture le contexte parent par copie
+    [ ]{};         // Ne capture pas le contexte parent
 }
+
 \end{lstlisting}
+
+\subsection*{Itérateurs}
+
+\begin{lstlisting}
+for (auto x; iterable);   // Boucle itérative sur itérable
+
+vector<int>::iterator ptr; // Itérable explicite
+for (ptr=ar.begin(); ptr < ar.end(); ptr++);
+
+\end{lstlisting}
+
 
 \section*{Tokens alternatifs}
 
 \begin{lstlisting}
-true and false          // Conjonction logique
-true or false           // Disjonction logique
-not true                // Négation logique
-
-compl 4
-4 bitor 3               // Disjonction bit à bit
-4 bitand 3              // Conjonction bit à bit
-4 xor 3                 // Disjonction exclusive bit à bit
+true and false  // Conjonction logique (&&)
+true or false   // Disjonction logique (||)
+not true        // Négation logique (!)
+compl 4         // Complément à 1 (~)
+4 bitor 3       // Disjonction bit à bit (|)
+4 bitand 3      // Conjonction bit à bit (&)
+4 xor 3         // Disjonction exclusive bit à bit (^)
 \end{lstlisting}
 
 \section*{Smart Pointer}
 
+Contruction RAII, pas besoin d'appeler \emph{delete}.
+
 \begin{lstlisting}
-void foo() {
-   std::shared_ptr<Dog> doggo(new Dog());
-   doggo->bark();
-   // Pas besoin de supprimer le Dog.
-}
+// Pointeur unique
+std::unique_ptr<Foo> foo = std::make_unique<Foo>(Foo);
+std::unique_ptr<Foo> bar = nullptr;
+bar = std::move(foo);
+
+// Pointeur multiple (shared_ptr)
+auto dog = std::make_shared<Dog>(Dog);
+dog->bark();
+
+// Pointeur faible
+std::weak_ptr<int> gw;
+gw = dog;
+std::cout << gw.use_count() // 1
 
 \end{lstlisting}
 
 \section*{Étrangetés}
 
 \begin{lstlisting}
-// Surcharge de méthode privées
+// Surcharge de méthode privées est possible
 class Foo {
 private:
    virtual void bar();
 };
 class FooSub : public Foo {
-   virtual void bar();      // Surcharge Foo::bar!
+   virtual void bar(); // Surcharge Foo::bar!
 };
 
-assert(0 == false and false == null); // La plupart du temps
+// Most Vexing parse : n'affiche rien
+struct A {};
+struct B { B(A a) { std::cout << "yop"; } };
+int main() { B b(A()); }
+
+
+// La plupart du temps
+assert(0 == false and false == null);
 \end{lstlisting}
 
 \section*{S.O.L.I.D.}
