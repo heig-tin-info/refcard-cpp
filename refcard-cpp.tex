@@ -292,8 +292,7 @@ class Dog {
     void setName(const std::string& dogsName);
     void setWeight(int dogsWeight);
 
-    // Si marqué const, la méthode ne modifie pas l'état de l'objet.
-    virtual void print() const;
+    virtual void print() const; // Méthode ne modifie pas les attributs
 
     // Méthode implémentée dans le body d'une classe
     void bark() const { std::cout << name << " barks!" << endl; }
@@ -321,152 +320,158 @@ class C { // Classe abstraite
     C() = default;                         // Valeur par défaut
     const C& operator=(C &other) = delete; // Affectation supprimée
 };
+
+class U {
+    explicit U(int a); // Autorise u = U(3) mais pas u = 3
+    friend void i();   // Fonction i() à un accès privilégié à U
+    friend class C;    // Classe C à un accès privilégié
+    static int y;      // Attribut partagé par tous les objets de U
+    class Z {};        // Classe imbriquée
+}
 \end{lstlisting}
 
 \section*{Héritage et polymorphisme}
 
 \begin{lstlisting}
-class OwnedDog : public Dog {
-public:
-    void setOwner(const std::string& dogsOwner);
-    void print() const override; // Surcharge
-private:
+class OwnedDog : public Dog {       // Hérite de Dog
     std::string owner;
+  public:
+    void print() const override;    // Surcharge (méthode doit être virtuelle)
+    void setOwner(const std::string& dogsOwner); // Nouvelle méthode
 };
 
 void OwnedDog::print() const {
-    Dog::print(); // Appel de la méthode du parent
+    Dog::print();                   // Appel de la méthode du parent
     std::cout << "Dog is owned by " << owner << endl;
 }
-\end{lstlisting}
 
-\section*{Polymorphisme}
+// Problème du diamant : héritage virtuel pour éviter le double appel
+class Somewhere {};
+class Left : public virtual Somewhere {};
+class right : public virtual Somewhere {};
+class Both() : public Left, public Right {}; // Héritage multiple
 
-\begin{lstlisting}
+// Surcharge des opérateurs
 T operator+(T x, T y);  // Surcharge opérateur addition de type T
 T operator-(T x);       // Surcharge opérateur unaire de negation -x
 T operator++(int);      // Surcharge opérateur postfix
 
+// Affectation dynamique
+class Animal {};
+class Dog : public Animal {};
+class Mouse : public Animal {};
+int main() {
+    Animal *animal = new Dog; // Veiller à bien utiliser `override` !
+}
 \end{lstlisting}
 
 \section*{Exceptions}
 
 \begin{lstlisting}
 #include <exception>
-#include <stdexcept>
 
-try {
-   throw std::runtime_error("A problem occured");
+// noexcept remplace throw() depuis C++11
+class MyException : public std::exception {
+    virtual const char * what() const noexcept { ... }
 }
-catch (const std::exception& ex) {
-   std::count << ex.what();
-}
-catch (...) {
+
+// En cas d'exception les destructeurs des objets locaux sont appelés.
+try { throw std::runtime_error("A problem occured"); }
+catch (const std::exception& ex) { std::count << ex.what(); }
+catch (...) { // Avec ... capture toute autre exception
    std::cout << "Unknown exception caught";
    throw; // Relève l'exception
 }
 \end{lstlisting}
 
 \section*{STL}
-
+Bibliothèque standard de templates C++
 \subsection*{Conteneurs de données séquentiels}
 
 \begin{lstlisting}
-array // Tableau statique contigus
-vector // Tableau dynamique O(1) amorti à l'insertion
-deque // Queue double (double-ended queue)
-forward_list // Liste chaînée simple
-list // Liste chaînée double
-\end{lstlisting}
+array                 // Tableau statique contigus
+vector                // Tableau dynamique O(1) amorti à l'insertion
+deque                 // Queue double (double-ended queue)
+forward_list          // Liste chaînée simple
+list                  // Liste chaînée double
 
-\subsection*{Vector}
+stack                 // Adaptateur sur deque (LIFO)
+queue                 // Adaptateur sur deque (FIFO)
+priority_queue        // Queue prioritaire
 
-\begin{lstlisting}
+// Vector
 #include <vector>
-
 string val;
 vector<string> vect;
 cin >> val;
-vect.push_back(val); // Ajoute à la fin
-vect.pop_back(val);  // Enlève à la fin
+vect.push_back(val);                   // Ajoute à la fin
+vect.pop_back(val);                    // Enlève à la fin
 vect.insert(iterator position, const value_type &val);
-vect.erase(iterator position); // Efface une position
+vect.erase(iterator position);         // Efface une position
 vect.erase(iterator first, iterator last); // Efface un intervalle
 vect[i]; // Position i
+vect.at[i]; // Comme vect[i] mais throw une exception out_of_range()
 vect.front(); vect.back() // Accès des extrémités
 vect.empty(); // Vide ?
 vect.capacity(); // Taille du vecteur
 
-\end{lstlisting}
-
-\subsection*{Tuples}
-
-\begin{lstlisting}
-#include <tuple>
-
-auto x = make_tuple(10, 'A');
-const int maxN = 1e9;
-const int maxL = 15;
-auto y = make_tuple(maxN, maxL);
-
-// Affichage
-cout << get<0>(x) << " " << get<1>(x) << "\n"; // Affiche "10 A"
-cout << get<0>(y) << " " << get<1>(y) << "\n"; // Affiche "1000000000 15"
-
-// Unpacking
-int i;
-int c;
-tie(i, c) = x;
-
-tuple<int, char, double> z(11, 'A', 3.1415);
-
-cout << tuple_size<decltype(z)>::value << "\n"; // Affiche 3
-
-auto concatenated = tuple_cat(x, y, z); // (10, 'A', 1e9, 15, 11, 'A', 3.1415)
+// Deque
+d.push_front(); d.pop_front();
 
 \end{lstlisting}
 
-\subsection*{Map}
+\subsection*{Conteneurs de données associatifs}
 
 \begin{lstlisting}
+set                   // Ensemble de clés accessibles en O(1)
+map                   // Paire clé valeurs itérable (LLRB Tree) O(logn)
+unordered_set         // Set non ordonnée (Hash map) O(1)
+unordered_map         // Map non ordonnée
+
+// Map
 #include <map>
-
 map<char, int> mymap;
 mymap.insert(pair<char,int>('A', 1));
 mymap.insert(pair<char,int>('Z', 26));
-map<char,int>::iterator it;
 
-// Affiche A->1, Z->26
-for (it=mymap.begin(); it!=mymap.end(); ++it)
-    std::cout << it->first << "->" << it->second << ', ';
+for (auto k : mymap)  // Affiche A->1, Z->26
+    cout << k->first << "->" << k->second << ', ';
 
-it = mymap.find('Z');
+map<char,int>::iterator it = mymap.find('Z');
 count << it->second; // Affiche 26
 
-#include <unordered_map> // Plus performant mais ordre non préservé
-
-\end{lstlisting}
-
-\subsection*{Set}
-
-\begin{lstlisting}
+// Sets
 #include <set>
-
 set<int> ST;
-
-ST.insert(4);
-ST.insert(8);
-ST.insert(15);
-
+ST.insert(4); ST.insert(8); ST.insert(15);
 ST.erase(8);
-
 set<int>::iterator it;
-for(it=ST.begin();it<ST.end();it++) {
-    cout << *it << endl;
-}
-
+for(it=ST.begin();it<ST.end();it++) { cout << *it << endl; }
 ST.clear();
 cout << ST.size(); // Affiche zéro
+\end{lstlisting}
+
+\subsection*{Autre}
+
+\begin{lstlisting}
+// Tuples
+#include <tuple>
+auto x = make_tuple(10, 'A');
+const int maxN = 1e9, maxL = 15;
+auto y = make_tuple(maxN, maxL);
+int i, c; tie(i, c) = x; // Unpacking
+tuple<int, char, double> z(11, 'A', 3.1415);
+cout << tuple_size<decltype(z)>::value << "\n"; // Affiche 3
+auto conc = tuple_cat(x, y, z); // (10, 'A', 1e9, 15, 11, 'A', 3.1415)
+cout << get<0>(x) << " " << get<1>(x) << "\n"; // Affiche "10 A"
+cout << get<0>(y) << " " << get<1>(y) << "\n"; // Affiche "1000000000 15"
+
+// Paires
+#include <utility>
+std::pair <std::string, double> p1
+std::pair <std::string, double> p2("tomatoes", 2.30);
+p1 = std::make_pair(std::string("lighbulbs"), 0.99);
+p2.first = "shoes"; p2.second = 39.90;
 
 \end{lstlisting}
 
@@ -474,16 +479,10 @@ cout << ST.size(); // Affiche zéro
 
 \begin{lstlisting}
 vector<pair<int, int> > tester;
-tester.push_back(make_pair(3,6));
-tester.push_back(make_pair(1,9));
-tester.push_back(make_pair(5,0));
-sort(
-    tester.begin(),
-    tester.end(),
+tester.push_back(make_pair(3,6)); tester.push_back(make_pair(1,9));
+sort(tester.begin(), tester.end(),
     [](const pair<int, int>& lhs, const pair<int, int>& rhs) {
-        return lhs.second < rhs.second;
-    }
-);
+        return lhs.second < rhs.second; });
 
 struct S { void f(int i); };
 void S::f(int i) {
@@ -498,29 +497,6 @@ void S::f(int i) {
     [ ]{};         // Ne capture pas le contexte parent
 }
 
-\end{lstlisting}
-
-\subsection*{Itérateurs}
-
-\begin{lstlisting}
-for (auto x; iterable);   // Boucle itérative sur itérable
-
-vector<int>::iterator ptr; // Itérable explicite
-for (ptr=ar.begin(); ptr < ar.end(); ptr++);
-
-\end{lstlisting}
-
-
-\section*{Tokens alternatifs}
-
-\begin{lstlisting}
-true and false  // Conjonction logique (&&)
-true or false   // Disjonction logique (||)
-not true        // Négation logique (!)
-compl 4         // Complément à 1 (~)
-4 bitor 3       // Disjonction bit à bit (|)
-4 bitand 3      // Conjonction bit à bit (&)
-4 xor 3         // Disjonction exclusive bit à bit (^)
 \end{lstlisting}
 
 \section*{Smart Pointer}
@@ -544,36 +520,45 @@ std::cout << gw.use_count() // 1
 
 \end{lstlisting}
 
+\section*{Tokens alternatifs}
+
+\begin{lstlisting}
+true and false  // Conjonction logique (&&)
+true or false   // Disjonction logique (||)
+not true        // Négation logique (!)
+compl 4         // Complément à 1 (~)
+4 bitor 3       // Disjonction bit à bit (|)
+4 bitand 3      // Conjonction bit à bit (&)
+4 xor 3         // Disjonction exclusive bit à bit (^)
+\end{lstlisting}
+
 \section*{Étrangetés}
 
 \begin{lstlisting}
 // Surcharge de méthode privées est possible
-class Foo {
-private:
-   virtual void bar();
-};
-class FooSub : public Foo {
-   virtual void bar(); // Surcharge Foo::bar!
-};
+class Foo { private: virtual void bar(); };
+class FooSub : public Foo { virtual void bar(); }; // Surcharge Foo::bar!
 
 // Most Vexing parse : n'affiche rien
 struct A {};
 struct B { B(A a) { std::cout << "yop"; } };
 int main() { B b(A()); }
 
-
 // La plupart du temps
 assert(0 == false and false == null);
 \end{lstlisting}
 
-\section*{S.O.L.I.D.}
-\begin{description}
-\item[S] Single responsibility principle
-\item[O] Open for extension, closed for modification
-\item[L] Liskov substition principle
-\item[I] Interface segregation principle
-\item[D] Dependency inversion principle
-\end{description}
+\section*{Idioms}
+\begin{lstlisting}
+S          Single responsibility principle
+  O        Open for extension, closed for modification
+    L      Liskov substition principle
+      I    Interface segregation principle
+        D  Dependency inversion principle
+RAII       Resource Acquisition is initialization
+CRTP       Curiously Recursive Template Pattern
+PIMPL      Pointer to implementation
+\end{lstlisting}
 
 \end{multicols*}
 \end{document}
