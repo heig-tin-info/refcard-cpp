@@ -19,7 +19,7 @@
 \input{revision}
 
 \ifdefined\tinted
-  \pagecolor{CornflowerBlue!40}
+  \pagecolor{ProcessBlue!30}
 \fi
 
 \setlength{\parskip}{0.2em}
@@ -305,6 +305,10 @@ class Dog {
     int weight;
 public:
     Dog(); // Constructeur par défaut
+
+    // Constructeur avec liste d'initialisation
+    Dog(std::string name, int weight=0) : name{name}, weight(weight) 
+    { ... } 
     void setName(const std::string& dogsName);
     void setWeight(int dogsWeight);
 
@@ -401,7 +405,7 @@ vect.erase(iterator first, iterator last); // Efface un intervalle
 
 \end{lstlisting}
 
-\subsection*{Tuples}
+\subsection*{Tuples (Liste non-modifiable)}
 
 \begin{lstlisting}
 #include <tuple>
@@ -428,7 +432,7 @@ auto concatenated = tuple_cat(x, y, z); // (10, 'A', 1e9, 15, 11, 'A', 3.1415)
 
 \end{lstlisting}
 
-\subsection*{Map}
+\subsection*{Map (Association clé-valeur)}
 
 \begin{lstlisting}
 #include <map>
@@ -449,24 +453,20 @@ count << it->second; // Affiche 26
 
 \end{lstlisting}
 
-\subsection*{Set}
+\subsection*{Set (Ensemble de valeurs uniques)}
 
 \begin{lstlisting}
 #include <set>
-
 set<int> ST;
-
 ST.insert(4);
 ST.insert(8);
 ST.insert(15);
-
 ST.erase(8);
 
 set<int>::iterator it;
 for(it=ST.begin();it<ST.end();it++) {
     cout << *it << endl;
 }
-
 ST.clear();
 cout << ST.size(); // Affiche zéro
 
