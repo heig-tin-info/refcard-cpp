@@ -76,57 +76,51 @@
 
 \begin{multicols*}{3}
 
-\begin{tabularx}{\columnwidth}{lX}
-    \raisebox{-\totalheight}{\includegraphics[width=1cm]{assets/heig-vd-black.pdf}} &
-    \begin{center}
-      {\Large \bf Carte de référence C++11/C++17} \\
-      version \revision \ -- \revisiondate \\
-    \end{center}
-\end{tabularx}
+    \begin{tabularx}{\columnwidth}{lX}
+        \raisebox{-\totalheight}{\includegraphics[width=1cm]{assets/heig-vd-black.pdf}} &
+        \begin{center}
+            {\Large \bf Carte de référence C++11/C++17} \\
+            version \revision \ -- \revisiondate \\
+        \end{center}
+    \end{tabularx}
 
-Cette carte de référence peut être utilisée durant les travaux écrits et examens
-des cours \emph{progoo} et \emph{progoox} à moins que le contraire soit explicitement formulé.
-Elle est une liste non exhaustive des possibilités du langage C++. Elle est un complément à la carte
-de référence du langage C.
+    Cette carte de référence peut être utilisée durant les travaux écrits et examens
+    des cours \emph{progoo} et \emph{progoox} à moins que le contraire soit explicitement formulé.
+    Elle est une liste non exhaustive des possibilités du langage C++ et un complément à la carte de référence du langage C.
+    Ce travail est inspiré de \emph{Learn X in Y} et de la carte de référence de Matt Mahoney.
+    Ci-dessous, la signification des termes utilisés dans cette carte de référence.
 
-Ce travail est inspiré de \emph{Learn X in Y} et de la carte de référence de Matt Mahoney.
+    \begin{tabularx}{\linewidth}{
+            >{\hsize=0.5\hsize}X% 10% of 4\hsize
+            >{\hsize=1.5\hsize}X% 30% of 4\hsize
+            >{\hsize=0.5\hsize}X% 30% of 4\hsize
+            >{\hsize=1.5\hsize}X% 30% of 4\hsize
+            % sum=4.0\hsize for 4 columns
+        }
 
-Signification des termes utilisés dans cette carte de référence.
+        \tt \etc      & Continuation logique      & \tt \any  & N'importe quoi d'accepté     \\
+        \tt /\any/    & Expression régulière      & \tt \spc  & Espace obligatoire           \\
+        \cd{type}     & \tt int, long, float, ... & \cd{name} & \tt /[A-Za-z][A-Za-z0-9\_]+/ \\
+        \cd{value}    & Valeur                    & \cd{NAME} & \tt /[A-Z][A-Z0-9\_]+/       \\
+        \cd{filename} & Chemin de fichier relatif & \cd{expr} & e.g. \tt a + b               \\
+    \end{tabularx}
+    \hrule
 
-\begin{tabularx}{\linewidth}{
-  >{\hsize=0.5\hsize}X% 10% of 4\hsize
-  >{\hsize=1.5\hsize}X% 30% of 4\hsize
-  >{\hsize=0.5\hsize}X% 30% of 4\hsize
-  >{\hsize=1.5\hsize}X% 30% of 4\hsize
-     % sum=4.0\hsize for 4 columns
-  }
-
-  \tt \etc      & Continuation logique    & \tt \any    & N'importe quoi d'accepté \\
-  \tt /\any/    & Expression régulière    & \tt \spc    & Espace obligatoire \\
-  \cd{type}     & \tt int, long, float, ... & \cd{name} & \tt /[A-Za-z][A-Za-z0-9\_]+/ \\
-  \cd{value}    & Valeur & \cd{NAME} & \tt /[A-Z][A-Z0-9\_]+/ \\
-  \cd{filename} & Chemin de fichier relatif & \cd{expr}   & e.g. \tt a + b \\
-\end{tabularx}
-\hrule
-
-\section*{Différences C/C++}
-\begin{lstlisting}
+    \section*{Différences C/C++}
+    \begin{lstlisting}
 sizeof('c') == sizeof(char) == 1 // Différence par rapport au C
-void func(); // func n'accepte aucun arguments
-int *ip = nullptr; // Utiliser à la place de NULL
-#include <cstdio> // Au lieu de <stdio.h> (pas de suffix .h)
+void func();                     // func n'accepte aucun arguments
+int *ip = nullptr;               // Utiliser à la place de NULL
+#include <cstdio>                // Au lieu de <stdio.h> (pas de .h)
 \end{lstlisting}
 
-\section*{Généralités}
+    \section*{Généralités et spécificités}
 
-\begin{lstlisting}
+    \begin{lstlisting}
 // Surcharge de fonctions
 void say(char const* s) { printf("%s\n", s); }
 void say(int u) { printf("%d\n", u); }
-void main() {
-   say("Hello");
-   say(15);
-}
+void main() { say("Hello"); say(15); }
 
 // Arguments par défaut
 void foo(int a = 1; int b = 4) { ... }
@@ -140,9 +134,9 @@ for(auto x; iterable)   // Boucle itérative sur itérable
 int& r = x;             // Référence r sur x
 \end{lstlisting}
 
-\section*{Entrées sorties}
+    \section*{Entrées sorties (streams)}
 
-\begin{lstlisting}
+    \begin{lstlisting}
 #include <iostream>
 using namespace std; // Les streams dans l'espace de nom std
 int main() {
@@ -154,9 +148,9 @@ int main() {
 }
 \end{lstlisting}
 
-\section*{Chaînes de caractère}
+    \section*{Chaînes de caractère}
 
-\begin{lstlisting}
+    \begin{lstlisting}
 #include <string>
 
 string a = "Hello", b = "World";
@@ -166,9 +160,9 @@ a.append(" Dog"); // En C++ les chaînes sont modifiables
 cout << a; // "Hello Dog"
 \end{lstlisting}
 
-\section*{Références}
+    \section*{Références}
 
-\begin{lstlisting}
+    \begin{lstlisting}
 string foo = "I am foo";
 string& fooRef = foo; // Référence sur foo
 fooRef += ". Hi!"; // Modifie foo via la référence
@@ -200,9 +194,9 @@ func(foo()); // Référence temporaire
 
 \end{lstlisting}
 
-\section*{Enumérations}
+    \section*{Enumérations}
 
-\begin{lstlisting}
+    \begin{lstlisting}
 enum AnimalTypes {
     Mammals, Birds, Reptiles, Amphibians, Fish
 };
@@ -223,9 +217,9 @@ enum class Birds : uint8_t {
 }; // Ne sera pas implicitement casté
 \end{lstlisting}
 
-\section*{Templates}
+    \section*{Templates}
 
-\begin{lstlisting}
+    \begin{lstlisting}
 template<class T>
 class Box {
 public:
@@ -261,9 +255,9 @@ printMessage<42>(); // You said 42!
 
 \end{lstlisting}
 
-\section*{Namespaces}
+    \section*{Namespaces}
 
-\begin{lstlisting}
+    \begin{lstlisting}
 extern "C" { void f(); }    // Si f() a été compilé dans un objet C
 namespace N { class T {}; } // Cache la classe T dans le namespace N
 N::T t;                     // Utilise le nom T du namespace N
@@ -296,9 +290,9 @@ int main() {
 }
 \end{lstlisting}
 
-\section*{Classes}
+    \section*{Classes}
 
-\begin{lstlisting}
+    \begin{lstlisting}
 // Généralement déclaré dans un .h (ou .hpp)
 class Dog {
     std::string name; // Privé par défaut (private:)
@@ -307,8 +301,8 @@ public:
     Dog(); // Constructeur par défaut
 
     // Constructeur avec liste d'initialisation
-    Dog(std::string name, int weight=0) : name{name}, weight(weight) 
-    { ... } 
+    Dog(std::string name, int weight=0) : name{name}, weight(weight)
+    { ... }
     void setName(const std::string& dogsName);
     void setWeight(int dogsWeight);
 
@@ -343,9 +337,9 @@ int main() {
 } // Print "Goodbye Barkley"
 \end{lstlisting}
 
-\section*{Héritage et polymorphisme}
+    \section*{Héritage et polymorphisme}
 
-\begin{lstlisting}
+    \begin{lstlisting}
 class OwnedDog : public Dog {
 public:
     void setOwner(const std::string& dogsOwner);
@@ -360,18 +354,18 @@ void OwnedDog::print() const {
 }
 \end{lstlisting}
 
-\section*{Polymorphisme}
+    \section*{Polymorphisme}
 
-\begin{lstlisting}
+    \begin{lstlisting}
 T operator+(T x, T y);  // Surcharge opérateur addition de type T
 T operator-(T x);       // Surcharge opérateur unaire de negation -x
 T operator++(int);      // Surcharge opérateur postfix
 
 \end{lstlisting}
 
-\section*{Exceptions}
+    \section*{Exceptions}
 
-\begin{lstlisting}
+    \begin{lstlisting}
 #include <exception>
 #include <stdexcept>
 
@@ -387,11 +381,11 @@ catch (...) {
 }
 \end{lstlisting}
 
-\section*{Conteneurs de données}
+    \section*{Conteneurs de données}
 
-\subsection*{Vector}
+    \subsection*{Vector}
 
-\begin{lstlisting}
+    \begin{lstlisting}
 #include <vector>
 
 string val;
@@ -405,9 +399,9 @@ vect.erase(iterator first, iterator last); // Efface un intervalle
 
 \end{lstlisting}
 
-\subsection*{Tuples (Liste non-modifiable)}
+    \subsection*{Tuples (Liste non-modifiable)}
 
-\begin{lstlisting}
+    \begin{lstlisting}
 #include <tuple>
 
 auto x = make_tuple(10, 'A');
@@ -432,9 +426,9 @@ auto concatenated = tuple_cat(x, y, z); // (10, 'A', 1e9, 15, 11, 'A', 3.1415)
 
 \end{lstlisting}
 
-\subsection*{Map (Association clé-valeur)}
+    \subsection*{Map (Association clé-valeur)}
 
-\begin{lstlisting}
+    \begin{lstlisting}
 #include <map>
 
 map<char, int> mymap;
@@ -453,9 +447,9 @@ count << it->second; // Affiche 26
 
 \end{lstlisting}
 
-\subsection*{Set (Ensemble de valeurs uniques)}
+    \subsection*{Set (Ensemble de valeurs uniques)}
 
-\begin{lstlisting}
+    \begin{lstlisting}
 #include <set>
 set<int> ST;
 ST.insert(4);
@@ -472,9 +466,9 @@ cout << ST.size(); // Affiche zéro
 
 \end{lstlisting}
 
-\section*{Fonctions anonymes (lambda)}
+    \section*{Fonctions anonymes (lambda)}
 
-\begin{lstlisting}
+    \begin{lstlisting}
 vector<pair<int, int> > tester;
 tester.push_back(make_pair(3,6));
 tester.push_back(make_pair(1,9));
@@ -497,9 +491,9 @@ void S::f(int i) {
 }
 \end{lstlisting}
 
-\section*{Tokens alternatifs}
+    \section*{Tokens alternatifs}
 
-\begin{lstlisting}
+    \begin{lstlisting}
 true and false          // Conjonction logique
 true or false           // Disjonction logique
 not true                // Négation logique
@@ -510,9 +504,9 @@ compl 4
 4 xor 3                 // Disjonction exclusive bit à bit
 \end{lstlisting}
 
-\section*{Smart Pointer}
+    \section*{Smart Pointer}
 
-\begin{lstlisting}
+    \begin{lstlisting}
 void foo() {
    std::shared_ptr<Dog> doggo(new Dog());
    doggo->bark();
@@ -521,9 +515,9 @@ void foo() {
 
 \end{lstlisting}
 
-\section*{Étrangetés}
+    \section*{Étrangetés}
 
-\begin{lstlisting}
+    \begin{lstlisting}
 // Surcharge de méthode privées
 class Foo {
 private:
@@ -536,14 +530,14 @@ class FooSub : public Foo {
 assert(0 == false and false == null); // La plupart du temps
 \end{lstlisting}
 
-\section*{S.O.L.I.D.}
-\begin{description}
-\item[S] Single responsibility principle
-\item[O] Open for extension, closed for modification
-\item[L] Liskov substition principle
-\item[I] Interface segregation principle
-\item[D] Dependency inversion principle
-\end{description}
+    \section*{S.O.L.I.D.}
+    \begin{description}
+        \item[S] Single responsibility principle
+        \item[O] Open for extension, closed for modification
+        \item[L] Liskov substition principle
+        \item[I] Interface segregation principle
+        \item[D] Dependency inversion principle
+    \end{description}
 
 \end{multicols*}
 \end{document}
