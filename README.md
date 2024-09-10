@@ -1,6 +1,9 @@
 # Carte de référence C++ pour étudiants
 
 ![.github/workflows/ci.yml](https://github.com/heig-tin-info/refcard-cpp/workflows/.github/workflows/ci.yml/badge.svg)
+![version](https://img.shields.io/github/v/release/heig-tin-info/refcard-cpp)
+![downloads](https://img.shields.io/github/downloads/heig-tin-info/refcard-cpp/latest/total)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/heig-tin-info/refcard-cpp)
 
 Cette carte de référence est destinée à accompagner l'étudiant durant ses études d'ingénieur. Elle est en principe autorisée durant les travaux écrits et examens ; à confirmer par le professeur en charge de dispenser la matière.
 
