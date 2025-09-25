@@ -130,8 +130,16 @@ void main() {
    foo(20, 5); // a = 20, b = 5
 }
 
-for(auto x; iterable)   // Boucle itérative sur itérable
+for(auto x : iterable)   // Boucle itérative sur itérable
 int& r = x;             // Référence r sur x
+
+// Initializer lists
+std::vector<int> v{1, 2, 3, 4, 5};
+std::map<std::string, int> m{{"a", 1}, {"b", 2}};
+
+// Uniform initialization
+int x{42};
+std::string s{"Hello"};
 \end{lstlisting}
 
     \section*{Entrées sorties (streams)}
@@ -141,7 +149,7 @@ int& r = x;             // Référence r sur x
 using namespace std; // Les streams dans l'espace de nom std
 int main() {
    int i;
-   cout << "Enter your favorite number:\n");
+   cout << "Enter your favorite number:\n";
    cin >> i;
    cout << "Your favorite number is " << i << "\n";
    cerr << "An error message" << endl;
@@ -202,7 +210,7 @@ enum AnimalTypes {
 };
 
 AnimalTypes GetAnimalType() {
-    return AnimalTypes::REPTILES;
+    return Reptiles;
 }
 
 enum Amphibians : uint8_t {
@@ -319,7 +327,7 @@ public:
 protected:
     // Accès possible aux classes dérivées
 
-}
+}; // N'oubliez pas le point-virgule!
 
 // Déclaration implémentée dans un .cpp
 Dog::Dog() {
@@ -373,7 +381,7 @@ try {
    throw std::runtime_error("A problem occured");
 }
 catch (const std::exception& ex) {
-   std::count << ex.what();
+   std::cout << ex.what();
 }
 catch (...) {
    std::cout << "Unknown exception caught";
@@ -392,10 +400,16 @@ string val;
 vector<string> vect;
 cin >> val;
 vect.push_back(val); // Ajoute à la fin
-vect.pop_back(val);  // Enlève à la fin
-vect.insert(iterator position, const value_type &val);
-vect.erase(iterator position); // Efface une position
-vect.erase(iterator first, iterator last); // Efface un intervalle
+vect.pop_back();  // Enlève à la fin
+vect.insert(vect.begin(), val); // Insertion au début
+vect.erase(vect.begin()); // Efface une position
+vect.erase(vect.begin(), vect.begin() + 2); // Efface un intervalle
+
+// Accès sécurisé
+if (!vect.empty()) {
+    cout << vect[0] << " " << vect.at(1); // at() vérifie les bornes
+}
+cout << "Size: " << vect.size() << endl;
 
 \end{lstlisting}
 
@@ -441,7 +455,7 @@ for (it=mymap.begin(); it!=mymap.end(); ++it)
     std::cout << it->first << "->" << it->second << ', ';
 
 it = mymap.find('Z');
-count << it->second; // Affiche 26
+cout << it->second; // Affiche 26
 
 #include <unordered_map> // Plus performant mais ordre non préservé
 
@@ -458,11 +472,41 @@ ST.insert(15);
 ST.erase(8);
 
 set<int>::iterator it;
-for(it=ST.begin();it<ST.end();it++) {
+for(it=ST.begin(); it!=ST.end(); it++) {
     cout << *it << endl;
 }
 ST.clear();
 cout << ST.size(); // Affiche zéro
+
+\end{lstlisting}
+
+    \section*{Algorithmes STL essentiels}
+
+    \begin{lstlisting}
+#include <algorithm>
+#include <numeric>
+
+std::vector<int> v{3, 1, 4, 1, 5};
+
+// Tri
+std::sort(v.begin(), v.end());
+
+// Recherche
+auto it = std::find(v.begin(), v.end(), 4);
+bool found = (it != v.end());
+
+// Transformation
+std::vector<int> v2(v.size());
+std::transform(v.begin(), v.end(), v2.begin(), 
+               [](int x) { return x * 2; });
+
+// Réduction
+int sum = std::accumulate(v.begin(), v.end(), 0);
+
+// Filtrage (C++20 style avec remove_if)
+v.erase(std::remove_if(v.begin(), v.end(), 
+                       [](int x) { return x % 2 == 0; }), 
+        v.end());
 
 \end{lstlisting}
 
@@ -507,11 +551,129 @@ compl 4
     \section*{Smart Pointer}
 
     \begin{lstlisting}
-void foo() {
-   std::shared_ptr<Dog> doggo(new Dog());
-   doggo->bark();
-   // Pas besoin de supprimer le Dog.
+#include <memory>
+
+// shared_ptr - propriété partagée
+std::shared_ptr<Dog> doggo(new Dog());
+// ou mieux:
+auto doggo = std::make_shared<Dog>();
+doggo->bark();
+// Pas besoin de supprimer le Dog.
+
+// unique_ptr - propriété exclusive
+std::unique_ptr<Dog> dog = std::make_unique<Dog>();
+std::unique_ptr<Dog> dog2 = std::move(dog); // Transfert de propriété
+
+// weak_ptr - référence faible (évite cycles)
+std::weak_ptr<Dog> weak_dog = doggo;
+if (auto strong_dog = weak_dog.lock()) {
+    strong_dog->bark(); // Utilisation sécurisée
 }
+
+\end{lstlisting}
+
+    \section*{RAII et Rule of Five}
+
+    \begin{lstlisting}
+// RAII (Resource Acquisition Is Initialization)
+class ResourceManager {
+    FILE* file;
+public:
+    ResourceManager(const char* filename) 
+        : file(fopen(filename, "r")) {
+        if (!file) throw std::runtime_error("Cannot open file");
+    }
+    
+    ~ResourceManager() { 
+        if (file) fclose(file); // Libération automatique
+    }
+    
+    // Rule of Five (si vous gérez des ressources)
+    ResourceManager(const ResourceManager&) = delete;            // Copy ctor
+    ResourceManager& operator=(const ResourceManager&) = delete; // Copy assign
+    ResourceManager(ResourceManager&& other) noexcept           // Move ctor
+        : file(other.file) { other.file = nullptr; }
+    ResourceManager& operator=(ResourceManager&& other) noexcept; // Move assign
+    // Destructor déjà défini
+};
+
+\end{lstlisting}
+
+    \section*{Move semantics et constexpr}
+
+    \begin{lstlisting}
+// Move semantics
+std::vector<int> createVector() {
+    std::vector<int> v = {1, 2, 3, 4, 5};
+    return v; // Move automatique
+}
+
+class MyClass {
+public:
+    // Move constructor
+    MyClass(MyClass&& other) noexcept 
+        : data(std::move(other.data)) {}
+    
+    // Move assignment
+    MyClass& operator=(MyClass&& other) noexcept {
+        data = std::move(other.data);
+        return *this;
+    }
+private:
+    std::string data;
+};
+
+// constexpr - évaluation à la compilation
+constexpr int factorial(int n) {
+    return n <= 1 ? 1 : n * factorial(n - 1);
+}
+constexpr int result = factorial(5); // Calculé à la compilation
+
+// auto et decltype
+auto x = 42;        // int
+auto y = 3.14;      // double
+decltype(x) z = 10; // int
+
+// C++17: structured bindings
+auto [key, value] = std::make_pair("hello", 42);
+std::map<std::string, int> m{{"a", 1}, {"b", 2}};
+for (const auto& [k, v] : m) {
+    std::cout << k << ": " << v << "\n";
+}
+
+// C++17: if constexpr
+template<typename T>
+void process(T value) {
+    if constexpr (std::is_integral_v<T>) {
+        // Code pour les entiers
+    } else {
+        // Code pour les autres types
+    }
+}
+
+\end{lstlisting}
+
+    \section*{Thread safety et concurrence}
+
+    \begin{lstlisting}
+#include <thread>
+#include <mutex>
+#include <atomic>
+
+// Threads
+std::thread t1([]{ std::cout << "Hello from thread\n"; });
+t1.join(); // Attendre la fin du thread
+
+// Mutex pour synchronisation
+std::mutex mtx;
+void safe_function() {
+    std::lock_guard<std::mutex> lock(mtx); // RAII lock
+    // Code thread-safe
+}
+
+// Atomic pour opérations atomiques
+std::atomic<int> counter{0};
+counter++; // Thread-safe
 
 \end{lstlisting}
 
@@ -527,7 +689,7 @@ class FooSub : public Foo {
    virtual void bar();      // Surcharge Foo::bar!
 };
 
-assert(0 == false and false == null); // La plupart du temps
+assert(0 == false and false == nullptr); // La plupart du temps
 \end{lstlisting}
 
     \section*{S.O.L.I.D.}
