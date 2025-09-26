@@ -40,9 +40,6 @@
 
 \setmonofont{Source Code Pro}
 
-% Configuration
-\renewcommand{\familydefault}{\sfdefault}
-
 \titleformat{\section}
   {\sffamily\bfseries\fontsize{12}{15}\selectfont} % ajoute  si tu veux en gras
   {}{0pt}{}
@@ -156,7 +153,8 @@ constexpr double pi = 3.14159265358979323846;
 
 // Likely/Unlikely (C++20)
 if (x > 0) [[likely]] { ... } else [[unlikely]] { ... }
-if (likely(x > 0)) { ... } else { ... } // C++23
+// C++23 style (plus concis)
+if (likely(x > 0)) { ... } else { ... }
 
 // Assert (debug uniquement)
 static_assert(sizeof(int) == 4, "int doit faire 4 bytes");
@@ -203,7 +201,7 @@ func(foo());                  // Référence temporaire
 int i;
 cin >> i;  // Lecture
 cout << "Number: " << i << "\n";         // Format
-cerr << "An error message" << endl; }    // Stderr
+cerr << "An error message" << endl;    // Stderr
 double x = 3.141592;
 cout << std::fixed; // Format décimal fixe
 cout.precision(2);  // 2 chiffres après la virgule
@@ -220,7 +218,7 @@ cout << "\n" << std::endl; // préférez \n (pas de flush)
 enum AnimalTypes { Mammals, Birds, Reptiles, Fish };
 AnimalTypes GetAnimalType() { return Reptiles; }
 
-// Enumérations typées (cast implicite en uint_8)
+// Enumérations typées (cast implicite en uint8_t)
 enum Amphibians : uint8_t { Frogs, Toads=2 };
 
 // Enum fortement typées (pas de cast implicite)
@@ -523,7 +521,7 @@ std::copy_if(v.begin(), v.end(), std::back_inserter(v3),
 
 \begin{cppcode}
 
-vector<pair<int, int> > v{{1,2}, {3,4}, {5,6}};
+vector<pair<int, int>> v{{1,2}, {3,4}, {5,6}};
 sort(
     v.begin(), v.end(),
     [](const pair<int, int>& lhs, const pair<int, int>& rhs) {
@@ -807,6 +805,22 @@ std::generator<int> fibonacci() {
     while (true) {
         co_yield a; auto next = a + b;
         a = b; b = next; } }
+\end{cppcode}
+
+\section*{Optimisation}
+\begin{cppcode}
+// Conseils de performance essentiels
+// 1. Préférer ++i à i++ pour les itérateurs
+for (auto it = v.begin(); it != v.end(); ++it) { /* ... */ }
+
+// 2. Utiliser const& pour éviter les copies
+void process(const std::vector<int>& v); // Pas de copie
+
+// 3. Réserver la mémoire si taille connue
+std::vector<int> v; v.reserve(1000); // Évite les réallocations
+
+// 4. Move pour les ressources coûteuses
+std::vector<int> v2 = std::move(v1); // Pas de copie
 \end{cppcode}
 
 % \section*{Étrangetés}
