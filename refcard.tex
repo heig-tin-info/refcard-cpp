@@ -86,7 +86,7 @@
     \begin{tabularx}{\columnwidth}{lX}
         \raisebox{-\totalheight}{\includegraphics[width=1cm]{assets/heig-vd-black.pdf}} &
         \begin{center}
-            {\Large \bf Carte de référence C++11/C++17} \\
+            {\Large \bf Carte de référence C++11/C++23} \\
             version \revision \ -- \revisiondate \\
         \end{center}
     \end{tabularx}
@@ -115,7 +115,7 @@
 
     \section*{Différences C/C++}
     \begin{cppcode}
-void func();         // n'accepte aucun arguments
+void func();         // n'accepte aucun argument
 int *ip = nullptr;   // Utiliser à la place de NULL
 #include <cstdio>    // Au lieu de <stdio.h> (pas de .h)
 \end{cppcode}
@@ -165,8 +165,8 @@ if (likely(x > 0)) { ... } else { ... } // C++23
 using namespace std; // Évite std:: avant cout, cin...
 int main() {
    int i;
-   cout << "Enter your favorite number:\n"; // Lecture
-   cin >> i;                                // Écriture
+   cout << "Enter your favorite number:\n"; // Écriture
+   cin >> i;                                // Lecture
    cout << "Number: " << i << "\n";         // Format
    cerr << "An error message" << endl; }    // Stderr
 \end{cppcode}
@@ -210,7 +210,7 @@ cout << std::fixed; // Format décimal fixe
 cout.precision(2);  // 2 chiffres après la virgule
 cout << x << endl;  // Affiche 3.14
 cout << std::scientific; // Format scientifique (3.14e+00)
-cout << std::setw(5) << std::setprecision(3) << x; "%+5.3f"
+cout << std::setw(5) << std::setprecision(3) << x; // comme "%+5.3f"
 cout << "\n" << std::endl; // préférez \n, endl flush le flux
 \end{cppcode}
 
@@ -364,6 +364,23 @@ T operator++(int);      // Surcharge x++ (postfixe)
 T& operator++();        // Surcharge ++x (préfixe)
 auto operator<=>(const P&) const = default;  // C++20 spaceship
 
+// Opérateurs de comparaison
+bool operator==(const T& other) const;
+bool operator!=(const T& other) const;
+bool operator<(const T& other) const;
+
+// Opérateurs d'accès
+T& operator[](size_t index);              // Accès par index
+const T& operator[](size_t index) const;
+T& operator*();                           // Déréférencement
+T* operator->();                          // Accès membre
+
+// Opérateurs d'assignation
+T& operator+=(const T& other);
+T& operator-=(const T& other);
+T& operator*=(const T& other);
+T& operator/=(const T& other);
+
 // Surcharge de flux
 template <class T>
 std::ostream& operator<<(std::ostream& os, const T& t) {
@@ -384,6 +401,21 @@ catch (...) {
    std::cout << "Unknown exception caught";
    throw; } // Relève l'exception
 
+// Hiérarchie d'exceptions standard
+// std::exception
+//   ├── std::logic_error
+//   │   ├── std::invalid_argument
+//   │   ├── std::domain_error
+//   │   ├── std::length_error
+//   │   └── std::out_of_range
+//   └── std::runtime_error
+//       ├── std::range_error
+//       ├── std::overflow_error
+//       └── std::underflow_error
+
+// Spécification noexcept
+void safe_function() noexcept;          // Ne lance jamais
+void conditional() noexcept(condition); // Conditionnel
 \end{cppcode}
 
 \section*{Conteneurs de données}
@@ -394,7 +426,7 @@ Tableau dynamique: capacité augmente de façon amortie (impl.-dépendant).
 #include <vector>
 
 vector<string> v;
-v.push_back(42); // Ajoute à la fin
+v.push_back("item"); // Ajoute à la fin
 v.back();        // Dernier élément
 v.pop_back();    // Enlève à la fin
 v.front();       // Premier élément
@@ -474,6 +506,38 @@ s.clear();
 cout << s.size(); // Affiche zéro
 \end{cppcode}
 
+\subsection*{Autres conteneurs STL}
+
+\begin{cppcode}
+// Deque (double-ended queue)
+#include <deque>
+std::deque<int> dq{1, 2, 3};
+dq.push_front(0); dq.push_back(4); // Insertion aux deux bouts O(1)
+
+// List (liste doublement chaînée)
+#include <list>
+std::list<int> lst{1, 3, 5};
+lst.insert(++lst.begin(), 2); // Insertion O(1) si on a l'itérateur
+
+// Stack (pile LIFO)
+#include <stack>
+std::stack<int> stk;
+stk.push(1); stk.push(2);
+int top = stk.top(); stk.pop(); // top = 2
+
+// Queue (file FIFO)
+#include <queue>
+std::queue<int> q;
+q.push(1); q.push(2);
+int front = q.front(); q.pop(); // front = 1
+
+// Priority queue (tas)
+#include <queue>
+std::priority_queue<int> pq; // Max-heap par défaut
+pq.push(3); pq.push(1); pq.push(4);
+int max = pq.top(); pq.pop(); // max = 4
+\end{cppcode}
+
 \section*{Algorithmes STL essentiels}
 
 \begin{cppcode}
@@ -502,6 +566,20 @@ auto sum = std::accumulate(v.begin(), v.end(), 0);
 v.erase(std::remove_if(v.begin(), v.end(),
                        [](int x) { return x % 2 == 0; }),
         v.end());
+
+// Autres algorithmes utiles
+auto min_it = std::min_element(v.begin(), v.end());
+auto max_it = std::max_element(v.begin(), v.end());
+std::swap(*min_it, *max_it);
+
+bool all_positive = std::all_of(v.begin(), v.end(),
+                                [](int x) { return x > 0; });
+bool any_negative = std::any_of(v.begin(), v.end(),
+                                [](int x) { return x < 0; });
+
+std::vector<int> v3;
+std::copy_if(v.begin(), v.end(), std::back_inserter(v3),
+             [](int x) { return x % 2 == 0; }); // Copie conditionnelle
 \end{cppcode}
 
 \section*{Fonctions anonymes (lambda)}
@@ -559,6 +637,29 @@ if (auto strong_dog = weak_dog.lock()) {
 }
 \end{cppcode}
 
+\section*{Casting et conversions}
+\begin{cppcode}
+// Casts C++ sécurisés (préférés aux casts C)
+int i = 42;
+double d = static_cast<double>(i);        // Conversion sûre
+
+class Base {}; class Derived : public Base {};
+Base* b = new Derived();
+Derived* d = dynamic_cast<Derived*>(b);   // Cast avec vérification
+if (d != nullptr) { /* succès */ }
+
+// Conversion de pointeurs (dangereux)
+void* ptr = &i;
+int* iptr = reinterpret_cast<int*>(ptr);
+
+// Enlever const (dangereux)
+const int ci = 42;
+int& ri = const_cast<int&>(ci);
+
+// Cast C style (éviter)
+double d2 = (double)i; // Préférer static_cast<double>(i)
+\end{cppcode}
+
 \section*{Constexpr}
 \begin{cppcode}
     // constexpr - évaluation à la compilation
@@ -566,6 +667,30 @@ constexpr int factorial(int n) {
     return n <= 1 ? 1 : n * factorial(n - 1);
 }
 constexpr int result = factorial(5); // Calculé à la compilation
+\end{cppcode}
+
+\section*{Gestion mémoire et RAII}
+\begin{cppcode}
+// RAII (Resource Acquisition Is Initialization)
+class FileHandler {
+    FILE* file;
+public:
+    FileHandler(const char* name) : file(fopen(name, "r")) {
+        if (!file) throw std::runtime_error("Cannot open file");
+    }
+    ~FileHandler() { if (file) fclose(file); } // Cleanup automatique
+    FILE* get() { return file; }
+};
+
+// Allocation/désallocation manuelle (éviter si possible)
+int* ptr = new int(42);        // Allocation
+delete ptr;                    // Désallocation
+int* arr = new int[10];        // Tableau
+delete[] arr;                  // Désallocation tableau
+
+// Préférer les containers et smart pointers
+std::vector<int> v(10, 42);    // Gestion automatique
+auto ptr = std::make_unique<int>(42); // Smart pointer
 \end{cppcode}
 
 \section*{Move semantics}
@@ -688,6 +813,18 @@ void process(T value) {
         // Code pour les autres types
     }
 }
+
+// Using declarations et alias
+using std::cout, std::endl; // Import sélectif (C++17)
+using vec_int = std::vector<int>; // Alias de type
+template<typename T>
+using vec = std::vector<T>; // Template alias
+
+// Attribute (C++11/14/17/20)
+[[nodiscard]] int important_function(); // Résultat à ne pas ignorer
+[[maybe_unused]] int x = 42;           // Variable potentiellement inutilisée
+[[deprecated("Use new_function()")]] void old_function();
+[[fallthrough]]; // Dans un switch, chute intentionnelle
 \end{cppcode}
 
 \section*{Thread safety et concurrence}
@@ -711,6 +848,52 @@ void safe_function() {
 std::atomic<int> counter{0};
 counter++; // Thread-safe
 
+// std::condition_variable pour synchronisation avancée
+std::mutex mtx;
+std::condition_variable cv;
+bool ready = false;
+
+void worker() {
+    std::unique_lock<std::mutex> lock(mtx);
+    cv.wait(lock, []{ return ready; }); // Attendre signal
+    // Travail...
+}
+
+void notifier() {
+    {
+        std::lock_guard<std::mutex> lock(mtx);
+        ready = true;
+    }
+    cv.notify_one(); // Réveiller un thread
+}
+
+// std::future pour résultats asynchrones
+std::future<int> result = std::async(std::launch::async, [](){
+    return 42;
+});
+int value = result.get(); // Récupérer le résultat
+\end{cppcode}
+
+\section*{Debug et assertions}
+\begin{cppcode}
+#include <cassert>
+
+// Assertions (désactivées avec NDEBUG)
+assert(x > 0); // Vérification en debug uniquement
+
+// static_assert (vérification à la compilation)
+static_assert(sizeof(int) == 4, "int doit faire 4 bytes");
+static_assert(std::is_integral_v<int>);
+
+// Compilation conditionnelle
+#ifdef DEBUG
+    std::cout << "Debug info: " << x << std::endl;
+#endif
+
+#ifndef NDEBUG
+    // Code de debug
+    std::cerr << "Debug: variable = " << var << std::endl;
+#endif
 \end{cppcode}
 
 \section*{Utilitaires modernes}
@@ -737,6 +920,84 @@ auto t = 150ms + 2s;
 // <format> (C++20) <print> (C++23)
 std::string s = std::format("Hello {}, value = {}", "world", 42);
 std::print("Pi ~ {:.3f}\n", 3.14159); // C++23
+
+// <expected> (C++23) - gestion d'erreurs sans exceptions
+std::expected<int, std::string> divide(int a, int b) {
+    if (b == 0) return std::unexpected("Division by zero");
+    return a / b;
+}
+auto result = divide(10, 2);
+if (result) std::cout << *result; // 5
+else std::cout << result.error(); // message d'erreur
+
+// Modules (C++20)
+// export module math;
+// export int add(int a, int b) { return a + b; }
+// import math; // dans un autre fichier
+
+// Coroutines (C++20) - exemple simple
+std::generator<int> fibonacci() {
+    int a = 0, b = 1;
+    while (true) {
+        co_yield a;
+        auto next = a + b;
+        a = b; b = next;
+    }
+}
+\end{cppcode}
+
+\section*{Littéraux et suffixes}
+\begin{cppcode}
+// Littéraux numériques
+auto i = 42;        // int
+auto l = 42L;       // long
+auto ll = 42LL;     // long long
+auto u = 42U;       // unsigned
+auto f = 3.14f;     // float
+auto d = 3.14;      // double (défaut)
+auto ld = 3.14L;    // long double
+
+// Bases numériques
+auto bin = 0b1010;  // Binaire (C++14)
+auto oct = 0755;    // Octal
+auto hex = 0xDEAD;  // Hexadécimal
+
+// Séparateurs (C++14)
+auto big = 1'000'000; // 1000000
+
+// Chaînes littérales
+auto s1 = "Hello";     // const char*
+auto s2 = "Hello"s;    // std::string (C++14)
+auto sv = "Hello"sv;   // std::string_view (C++17)
+
+// Raw strings
+auto raw = R"(Path: C:\Users\Name\File.txt)";
+auto multiline = R"delimiter(
+    Texte sur
+    plusieurs lignes
+)delimiter";
+\end{cppcode}
+
+\section*{Préprocesseur}
+\begin{cppcode}
+// Macros essentielles
+#define MAX(a,b) ((a)>(b)?(a):(b))  // Éviter, préférer template
+#define SQUARE(x) ((x)*(x))         // Problème: SQUARE(++i)
+
+// Macros utiles
+#ifdef DEBUG
+#define DBG(x) std::cout << #x " = " << (x) << std::endl
+#else
+#define DBG(x)
+#endif
+
+// Concaténation
+#define CONCAT(a,b) a##b
+int CONCAT(var, 42) = 10; // int var42 = 10;
+
+// Stringification
+#define STRINGIFY(x) #x
+const char* name = STRINGIFY(variable); // "variable"
 \end{cppcode}
 
 \section*{Étrangetés}
@@ -765,6 +1026,25 @@ string retVal = foo(); // Choix selon optimisation:
 
 return std::string("hello") // RVO (Return Value Optim.)
 return result; // NRVO (Named Return Value Optimization)
+
+// Conseils de performance
+// 1. Préférer ++i à i++ pour les itérateurs
+for (auto it = v.begin(); it != v.end(); ++it) { /* ... */ }
+
+// 2. Utiliser const& pour éviter les copies
+void process(const std::vector<int>& v); // Pas de copie
+
+// 3. Réserver la mémoire si taille connue
+std::vector<int> v;
+v.reserve(1000); // Évite les réallocations
+
+// 4. Utiliser emplace au lieu de push
+v.emplace_back(args...); // Construction in-place
+// au lieu de v.push_back(Type(args...));
+
+// 5. Move pour les ressources coûteuses
+std::vector<int> v1 = create_big_vector();
+std::vector<int> v2 = std::move(v1); // Pas de copie
 \end{cppcode}
 
 \section*{S.O.L.I.D.}
