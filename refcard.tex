@@ -157,18 +157,10 @@ constexpr double pi = 3.14159265358979323846;
 // Likely/Unlikely (C++20)
 if (x > 0) [[likely]] { ... } else [[unlikely]] { ... }
 if (likely(x > 0)) { ... } else { ... } // C++23
-\end{cppcode}
-\section*{Entrées sorties (streams)}
 
-\begin{cppcode}
-#include <iostream>
-using namespace std; // Évite std:: avant cout, cin...
-int main() {
-   int i;
-   cout << "Enter your favorite number:\n"; // Écriture
-   cin >> i;                                // Lecture
-   cout << "Number: " << i << "\n";         // Format
-   cerr << "An error message" << endl; }    // Stderr
+// Assert (debug uniquement)
+static_assert(sizeof(int) == 4, "int doit faire 4 bytes");
+static_assert(std::is_integral_v<int>);
 \end{cppcode}
 
 \section*{Chaînes de caractère}
@@ -180,12 +172,15 @@ string a = "Hello", b = "World";
 cout << a + " " + b; // "Hello World"
 cout << a + " You"; // "Hello You"
 a.append(" Dog"); // En C++ les chaînes sont modifiables
-
+auto raw = R"(Path: C:\Users\Name\File.txt)";
+auto multiline = R"delimiter(
+   ...
+)delimiter"; // Multiligne
 \end{cppcode}
 
-    \section*{Références}
+\section*{Références}
 
-    \begin{cppcode}
+\begin{cppcode}
 string foo = "foo";
 string& fooRef = foo;    // Référence sur foo
 fooRef += "bar";         // Modifie foo via la référence
@@ -199,19 +194,23 @@ cbarRef += ". Hi!";       // Erreur ! cbarRef est const
 string str;
 void func(string& s) { ... }  // Référence standard
 void func(string&& s) { ... } // Référence temporaire
-func(str); // Référence standard
-func(foo()); // Référence temporaire
+func(str);                    // Référence standard
+func(foo());                  // Référence temporaire
 \end{cppcode}
 
-\section*{Flux}
+\section*{Flux / Streams}
 \begin{cppcode}
+int i;
+cin >> i;  // Lecture
+cout << "Number: " << i << "\n";         // Format
+cerr << "An error message" << endl; }    // Stderr
 double x = 3.141592;
 cout << std::fixed; // Format décimal fixe
 cout.precision(2);  // 2 chiffres après la virgule
 cout << x << endl;  // Affiche 3.14
 cout << std::scientific; // Format scientifique (3.14e+00)
-cout << std::setw(5) << std::setprecision(3) << x; // comme "%+5.3f"
-cout << "\n" << std::endl; // préférez \n, endl flush le flux
+cout << std::setw(5) << std::setprecision(3) << x; // %5.3f
+cout << "\n" << std::endl; // préférez \n (pas de flush)
 \end{cppcode}
 
 \section*{Enumérations}
@@ -279,12 +278,8 @@ struct A {
   ~A();                   // 6. Destructeur
 }; // Point virgule obligatoire
 
-// Rule-of-zero:
-// préférer le cas d'utiliser toutes définitions par défaut
-// Rule-of-three:
-// toujours définir 2, 3, 6 si une des 3 est définie
-// Rule-of-five:
-// toujours définir 2, 3, 4, 5, 6 si une des 5 est définie
+// Rule-of-three: 2, 3, 6
+// Rule-of-five: 2, 3, 4, 5, 6
 
 class Dog {
     std::string name; // Privé par défaut (private:)
@@ -293,22 +288,16 @@ class Dog {
     std::vector<std::string> nicknames;
 public:
     Dog(); // Constructeur par défaut
-
     // Constructeur avec members initializer list
     Dog(std::string n, int w=0) : name{n}, weight(w) {}
-
     // Constructeur avec liste d'initialisation
     Dog(std::initializer_list<std::string> nicks)
         : nicknames(nicks), age(0) {}
-
     void setName(const std::string& dogsName);
     void setWeight(int dogsWeight);
-
     void print() const; // const: ne modifie pas l'objet
-
     // Méthode définie dans le body d'une classe
     void bark() const { std::cout << name << " barks!" << endl; }
-
 }; // Ne pas oublier le point-virgule!
 
 // Implémentation externe des méthodes
@@ -321,7 +310,6 @@ class C {
     C(const C&) = delete; // Interdit la copie
     virtual ~C() = default; // Destructeur virtuel
     void f() const; // Méthode constante
-    void f() noexcept; // Ne lance pas d'exception
     static int count; // Attribut statique (partagé)
     static int getCount(); // Méthode statique
 };
@@ -390,28 +378,13 @@ std::ostream& operator<<(std::ostream& os, const T& t) {
 \section*{Exceptions}
 
 \begin{cppcode}
-#include <exception>
-#include <stdexcept>
-
-try {
+try { // inclure <stdexcept>, <exception>
    throw std::runtime_error("A problem occured"); }
 catch (const std::exception& ex) {
    std::cout << ex.what(); }
 catch (...) {
    std::cout << "Unknown exception caught";
    throw; } // Relève l'exception
-
-// Hiérarchie d'exceptions standard
-// std::exception
-//   ├── std::logic_error
-//   │   ├── std::invalid_argument
-//   │   ├── std::domain_error
-//   │   ├── std::length_error
-//   │   └── std::out_of_range
-//   └── std::runtime_error
-//       ├── std::range_error
-//       ├── std::overflow_error
-//       └── std::underflow_error
 
 // Spécification noexcept
 void safe_function() noexcept;          // Ne lance jamais
@@ -506,38 +479,6 @@ s.clear();
 cout << s.size(); // Affiche zéro
 \end{cppcode}
 
-\subsection*{Autres conteneurs STL}
-
-\begin{cppcode}
-// Deque (double-ended queue)
-#include <deque>
-std::deque<int> dq{1, 2, 3};
-dq.push_front(0); dq.push_back(4); // Insertion aux deux bouts O(1)
-
-// List (liste doublement chaînée)
-#include <list>
-std::list<int> lst{1, 3, 5};
-lst.insert(++lst.begin(), 2); // Insertion O(1) si on a l'itérateur
-
-// Stack (pile LIFO)
-#include <stack>
-std::stack<int> stk;
-stk.push(1); stk.push(2);
-int top = stk.top(); stk.pop(); // top = 2
-
-// Queue (file FIFO)
-#include <queue>
-std::queue<int> q;
-q.push(1); q.push(2);
-int front = q.front(); q.pop(); // front = 1
-
-// Priority queue (tas)
-#include <queue>
-std::priority_queue<int> pq; // Max-heap par défaut
-pq.push(3); pq.push(1); pq.push(4);
-int max = pq.top(); pq.pop(); // max = 4
-\end{cppcode}
-
 \section*{Algorithmes STL essentiels}
 
 \begin{cppcode}
@@ -552,34 +493,30 @@ std::reverse(v.begin(), v.end()); // Tri décroissant
 // Recherche
 auto it = std::find(v.begin(), v.end(), 4);
 bool found = (it != v.end());
-
 // Transformation
 std::vector<int> v2(v.size());
 std::transform(v.begin(), v.end(), v2.begin(),
                [](int x) { return x * 2; });
-
 // Réduction
 // Type retour celui de valeur initiale (ici int)
 auto sum = std::accumulate(v.begin(), v.end(), 0);
-
 // Filtrage (C++20 style avec remove_if)
 v.erase(std::remove_if(v.begin(), v.end(),
                        [](int x) { return x % 2 == 0; }),
         v.end());
-
 // Autres algorithmes utiles
 auto min_it = std::min_element(v.begin(), v.end());
 auto max_it = std::max_element(v.begin(), v.end());
 std::swap(*min_it, *max_it);
 
 bool all_positive = std::all_of(v.begin(), v.end(),
-                                [](int x) { return x > 0; });
+                        [](int x) { return x > 0; });
 bool any_negative = std::any_of(v.begin(), v.end(),
-                                [](int x) { return x < 0; });
+                        [](int x) { return x < 0; });
 
 std::vector<int> v3;
 std::copy_if(v.begin(), v.end(), std::back_inserter(v3),
-             [](int x) { return x % 2 == 0; }); // Copie conditionnelle
+    [](int x) { return x % 2 == 0; }); // Copie condit.
 \end{cppcode}
 
 \section*{Fonctions anonymes (lambda)}
@@ -635,38 +572,6 @@ std::weak_ptr<Dog> weak_dog = doggo;
 if (auto strong_dog = weak_dog.lock()) {
     strong_dog->bark(); // Utilisation sécurisée
 }
-\end{cppcode}
-
-\section*{Casting et conversions}
-\begin{cppcode}
-// Casts C++ sécurisés (préférés aux casts C)
-int i = 42;
-double d = static_cast<double>(i);        // Conversion sûre
-
-class Base {}; class Derived : public Base {};
-Base* b = new Derived();
-Derived* d = dynamic_cast<Derived*>(b);   // Cast avec vérification
-if (d != nullptr) { /* succès */ }
-
-// Conversion de pointeurs (dangereux)
-void* ptr = &i;
-int* iptr = reinterpret_cast<int*>(ptr);
-
-// Enlever const (dangereux)
-const int ci = 42;
-int& ri = const_cast<int&>(ci);
-
-// Cast C style (éviter)
-double d2 = (double)i; // Préférer static_cast<double>(i)
-\end{cppcode}
-
-\section*{Constexpr}
-\begin{cppcode}
-    // constexpr - évaluation à la compilation
-constexpr int factorial(int n) {
-    return n <= 1 ? 1 : n * factorial(n - 1);
-}
-constexpr int result = factorial(5); // Calculé à la compilation
 \end{cppcode}
 
 \section*{Gestion mémoire et RAII}
@@ -730,7 +635,6 @@ auto rng = v
 for (int x : rng) std::cout << x << ' '; // 4 16 36 64 100
 
 // Prise de tête zéro : lazy, pas de copies inutiles
-// Raccourcis utiles:
 auto first3 = rng | std::views::take(3);
 auto rev    = rng | std::views::reverse;
 
@@ -742,18 +646,14 @@ std::ranges::copy(rng, std::back_inserter(out));
 \section*{Slices et Vues (C++20)}
 
 \begin{cppcode}
-#include <span>
-#include <string_view>
-#include <vector>
+// Inclure <span>, <string_view>, <vector>
 
 // std::span : vue non-propriétaire sur un bloc contigu
 // (T[], vector<T>, array<T,N>) n'alloue pas,
 // ne possède pas, "slice" sans copie.
 void sum_all(std::span<const int> s) {
     long long sum = 0;
-    for (int x : s) sum += x;
-    /* ... */
-}
+    for (int x : s) sum += x; /* ... */ }
 
 std::vector<int> v{1,2,3,4,5};
 sum_all(v);              // conversion implicite vers span
@@ -763,8 +663,7 @@ sum_all(std::span{v}.subspan(1,3)); // slice [2,3,4]
 void print_sv(std::string_view sv) { /* pas de copie */ }
 
 std::string s = "hello world";
-print_sv(s);
-print_sv("abc");                  // littéral → string_view
+print_sv(s); print_sv("abc"); // littéral → string_view
 print_sv(std::string_view{s}.substr(6, 5)); // "world"
 \end{cppcode}
 
@@ -807,12 +706,7 @@ for (const auto& [k, v] : m) {
 // if constexpr (C++17) évaluation à la compilation
 template<typename T>
 void process(T value) {
-    if constexpr (std::is_integral_v<T>) {
-        // Code pour les entiers
-    } else {
-        // Code pour les autres types
-    }
-}
+    if constexpr (std::is_integral_v<T>) {} else {} }
 
 // Using declarations et alias
 using std::cout, std::endl; // Import sélectif (C++17)
@@ -821,80 +715,58 @@ template<typename T>
 using vec = std::vector<T>; // Template alias
 
 // Attribute (C++11/14/17/20)
-[[nodiscard]] int important_function(); // Résultat à ne pas ignorer
-[[maybe_unused]] int x = 42;           // Variable potentiellement inutilisée
+[[nodiscard]] int important(); // Résultat pas ignorer
+[[maybe_unused]] int x = 42;   // Variable potentiellement inutilisée
 [[deprecated("Use new_function()")]] void old_function();
 [[fallthrough]]; // Dans un switch, chute intentionnelle
 \end{cppcode}
 
-\section*{Thread safety et concurrence}
-\begin{cppcode}
-#include <thread>
-#include <mutex>
-#include <atomic>
+% \section*{Thread safety et concurrence}
+% \begin{cppcode}
+% #include <thread>
+% #include <mutex>
+% #include <atomic>
 
-// Threads
-std::thread t1([]{ std::cout << "Hello from thread\n"; });
-t1.join(); // Attendre la fin du thread
+% // Threads
+% std::thread t1([]{ std::cout << "Hello from thread\n"; });
+% t1.join(); // Attendre la fin du thread
 
-// Mutex pour synchronisation
-std::mutex mtx;
-void safe_function() {
-    std::lock_guard<std::mutex> lock(mtx); // RAII lock
-    // Code thread-safe
-}
+% // Mutex pour synchronisation
+% std::mutex mtx;
+% void safe_function() {
+%     std::lock_guard<std::mutex> lock(mtx); // RAII lock
+%     // Code thread-safe
+% }
 
-// Atomic pour opérations atomiques
-std::atomic<int> counter{0};
-counter++; // Thread-safe
+% // Atomic pour opérations atomiques
+% std::atomic<int> counter{0};
+% counter++; // Thread-safe
 
-// std::condition_variable pour synchronisation avancée
-std::mutex mtx;
-std::condition_variable cv;
-bool ready = false;
+% // std::condition_variable pour synchronisation avancée
+% std::mutex mtx;
+% std::condition_variable cv;
+% bool ready = false;
 
-void worker() {
-    std::unique_lock<std::mutex> lock(mtx);
-    cv.wait(lock, []{ return ready; }); // Attendre signal
-    // Travail...
-}
+% void worker() {
+%     std::unique_lock<std::mutex> lock(mtx);
+%     cv.wait(lock, []{ return ready; }); // Attendre signal
+%     // Travail...
+% }
 
-void notifier() {
-    {
-        std::lock_guard<std::mutex> lock(mtx);
-        ready = true;
-    }
-    cv.notify_one(); // Réveiller un thread
-}
+% void notifier() {
+%     {
+%         std::lock_guard<std::mutex> lock(mtx);
+%         ready = true;
+%     }
+%     cv.notify_one(); // Réveiller un thread
+% }
 
-// std::future pour résultats asynchrones
-std::future<int> result = std::async(std::launch::async, [](){
-    return 42;
-});
-int value = result.get(); // Récupérer le résultat
-\end{cppcode}
-
-\section*{Debug et assertions}
-\begin{cppcode}
-#include <cassert>
-
-// Assertions (désactivées avec NDEBUG)
-assert(x > 0); // Vérification en debug uniquement
-
-// static_assert (vérification à la compilation)
-static_assert(sizeof(int) == 4, "int doit faire 4 bytes");
-static_assert(std::is_integral_v<int>);
-
-// Compilation conditionnelle
-#ifdef DEBUG
-    std::cout << "Debug info: " << x << std::endl;
-#endif
-
-#ifndef NDEBUG
-    // Code de debug
-    std::cerr << "Debug: variable = " << var << std::endl;
-#endif
-\end{cppcode}
+% // std::future pour résultats asynchrones
+% std::future<int> result = std::async(std::launch::async, [](){
+%     return 42;
+% });
+% int value = result.get(); // Récupérer le résultat
+% \end{cppcode}
 
 \section*{Utilitaires modernes}
 
@@ -912,7 +784,6 @@ namespace fs = std::filesystem;
 for (auto& p : fs::directory_iterator(".")) {
     if (p.is_regular_file()) std::cout << p.path() << '\n';
 }
-
 // <chrono> (durées & time points)
 using namespace std::chrono_literals;
 auto t = 150ms + 2s;
@@ -930,131 +801,67 @@ auto result = divide(10, 2);
 if (result) std::cout << *result; // 5
 else std::cout << result.error(); // message d'erreur
 
-// Modules (C++20)
-// export module math;
-// export int add(int a, int b) { return a + b; }
-// import math; // dans un autre fichier
-
 // Coroutines (C++20) - exemple simple
 std::generator<int> fibonacci() {
     int a = 0, b = 1;
     while (true) {
-        co_yield a;
-        auto next = a + b;
-        a = b; b = next;
-    }
-}
+        co_yield a; auto next = a + b;
+        a = b; b = next; } }
 \end{cppcode}
 
-\section*{Littéraux et suffixes}
-\begin{cppcode}
-// Littéraux numériques
-auto i = 42;        // int
-auto l = 42L;       // long
-auto ll = 42LL;     // long long
-auto u = 42U;       // unsigned
-auto f = 3.14f;     // float
-auto d = 3.14;      // double (défaut)
-auto ld = 3.14L;    // long double
+% \section*{Étrangetés}
 
-// Bases numériques
-auto bin = 0b1010;  // Binaire (C++14)
-auto oct = 0755;    // Octal
-auto hex = 0xDEAD;  // Hexadécimal
+% \begin{cppcode}
+% // Surcharge de méthode privées
+% class Foo {
+% private:
+%    virtual void bar();
+% };
+% class FooSub : public Foo {
+%    virtual void bar() override;      // Surcharge Foo::bar!
+% };
+%\end{cppcode}
 
-// Séparateurs (C++14)
-auto big = 1'000'000; // 1000000
+% \section*{Optimisation}
+% \begin{cppcode}
+% // Objets temporaires
+% string foo() { return string("foo"); }
+% string retVal = foo(); // Choix selon optimisation:
+% // 1. Copie inutile d'un objet temporaire (< C++11)
+% // 2. Copy elision, suppression de la copie (C++17)
+% // 3. Utilisation de move semantics si disponible
 
-// Chaînes littérales
-auto s1 = "Hello";     // const char*
-auto s2 = "Hello"s;    // std::string (C++14)
-auto sv = "Hello"sv;   // std::string_view (C++17)
+% return std::string("hello") // RVO (Return Value Optim.)
+% return result; // NRVO (Named Return Value Optimization)
 
-// Raw strings
-auto raw = R"(Path: C:\Users\Name\File.txt)";
-auto multiline = R"delimiter(
-    Texte sur
-    plusieurs lignes
-)delimiter";
-\end{cppcode}
+% // Conseils de performance
+% // 1. Préférer ++i à i++ pour les itérateurs
+% for (auto it = v.begin(); it != v.end(); ++it) { /* ... */ }
 
-\section*{Préprocesseur}
-\begin{cppcode}
-// Macros essentielles
-#define MAX(a,b) ((a)>(b)?(a):(b))  // Éviter, préférer template
-#define SQUARE(x) ((x)*(x))         // Problème: SQUARE(++i)
+% // 2. Utiliser const& pour éviter les copies
+% void process(const std::vector<int>& v); // Pas de copie
 
-// Macros utiles
-#ifdef DEBUG
-#define DBG(x) std::cout << #x " = " << (x) << std::endl
-#else
-#define DBG(x)
-#endif
+% // 3. Réserver la mémoire si taille connue
+% std::vector<int> v;
+% v.reserve(1000); // Évite les réallocations
 
-// Concaténation
-#define CONCAT(a,b) a##b
-int CONCAT(var, 42) = 10; // int var42 = 10;
+% // 4. Utiliser emplace au lieu de push
+% v.emplace_back(args...); // Construction in-place
+% // au lieu de v.push_back(Type(args...));
 
-// Stringification
-#define STRINGIFY(x) #x
-const char* name = STRINGIFY(variable); // "variable"
-\end{cppcode}
+% // 5. Move pour les ressources coûteuses
+% std::vector<int> v1 = create_big_vector();
+% std::vector<int> v2 = std::move(v1); // Pas de copie
+% \end{cppcode}
 
-\section*{Étrangetés}
-
-\begin{cppcode}
-// Surcharge de méthode privées
-class Foo {
-private:
-   virtual void bar();
-};
-class FooSub : public Foo {
-   virtual void bar() override;      // Surcharge Foo::bar!
-};
-
-assert(0 == false and false == nullptr); // La plupart du temps
-\end{cppcode}
-
-\section*{Optimisation}
-\begin{cppcode}
-// Objets temporaires
-string foo() { return string("foo"); }
-string retVal = foo(); // Choix selon optimisation:
-// 1. Copie inutile d'un objet temporaire (< C++11)
-// 2. Copy elision, suppression de la copie (C++17)
-// 3. Utilisation de move semantics si disponible
-
-return std::string("hello") // RVO (Return Value Optim.)
-return result; // NRVO (Named Return Value Optimization)
-
-// Conseils de performance
-// 1. Préférer ++i à i++ pour les itérateurs
-for (auto it = v.begin(); it != v.end(); ++it) { /* ... */ }
-
-// 2. Utiliser const& pour éviter les copies
-void process(const std::vector<int>& v); // Pas de copie
-
-// 3. Réserver la mémoire si taille connue
-std::vector<int> v;
-v.reserve(1000); // Évite les réallocations
-
-// 4. Utiliser emplace au lieu de push
-v.emplace_back(args...); // Construction in-place
-// au lieu de v.push_back(Type(args...));
-
-// 5. Move pour les ressources coûteuses
-std::vector<int> v1 = create_big_vector();
-std::vector<int> v2 = std::move(v1); // Pas de copie
-\end{cppcode}
-
-\section*{S.O.L.I.D.}
-\begin{description}
-    \item[S] Single responsibility principle
-    \item[O] Open for extension, closed for modification
-    \item[L] Liskov substition principle
-    \item[I] Interface segregation principle
-    \item[D] Dependency inversion principle
-\end{description}
+% \section*{S.O.L.I.D.}
+% \begin{description}
+%     \item[S] Single responsibility principle
+%     \item[O] Open for extension, closed for modification
+%     \item[L] Liskov substition principle
+%     \item[I] Interface segregation principle
+%     \item[D] Dependency inversion principle
+% \end{description}
 
 \end{multicols*}
 \end{document}

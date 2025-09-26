@@ -52,5 +52,6 @@ RUN tlmgr install exam amsmath xfrac siunitx realboxes inconsolata \
 RUN apk add --no-cache qpdf ttf-dejavu
 
 RUN git config --global --add safe.directory /srv%
-
-RUN tlmgr install extsizes fontawesome menukeys relsize koma-script sectsty stix multirow
+RUN apk add --no-cache font-adobe-source-code-pro || apk add --no-cache ttf-source-code-pro || true
+RUN tlmgr install extsizes fontawesome menukeys relsize koma-script sectsty stix multirow sourcecodepro
+RUN fc-cache -fv && luaotfload-tool -u -v
