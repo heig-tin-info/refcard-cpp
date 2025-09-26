@@ -1,20 +1,17 @@
 \documentclass{article}
-
-\usepackage[a4paper, landscape, margin=1cm]{geometry}
+\usepackage[a4paper, landscape, margin=0.5cm]{geometry}
+\usepackage[fontsize=6.5pt]{scrextend}
 \usepackage{fontspec}
 \usepackage[french]{babel}
-\usepackage[fontsize=6.5pt]{scrextend}
-\usepackage[T1]{fontenc}
 \usepackage{multicol}
 \usepackage{tabularx}
-\usepackage{sectsty}
-\usepackage{lmodern}
 \usepackage{stix}
 \usepackage{listings}
 \usepackage[dvipsnames]{xcolor}
 \usepackage{multirow}
 \usepackage{titlesec}
 \usepackage{graphicx}
+\usepackage[newfloat]{minted}
 
 \input{revision}
 
@@ -22,40 +19,49 @@
   \pagecolor{ProcessBlue!30}
 \fi
 
-\setlength{\parskip}{0.2em}
-\setlength{\parindent}{0em}
+\setlength{\columnsep}{5mm}
+\setlength{\columnseprule}{0.4pt}
 
-% Highlight configuration for C programming language
-\lstset{
-  language=c,
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{2pt}
+
+\renewcommand{\familydefault}{\sfdefault}
+
+\usemintedstyle{trac}
+
+\newminted{cpp}{
+  fontsize=\footnotesize,
   breaklines=true,
-  keywordstyle=\bfseries\color{black},
-  basicstyle=\ttfamily\color{black},
-  emphstyle={\em \color{gray}},
-  emph={expr, type, NAME, ptr, name, expr, value, filename, label, member, type},
-  mathescape=true,
-  keepspaces=true,
-  showspaces=false,
-  showtabs=true,
+  autogobble=true,
+  linenos=false,        % passe à true si tu veux des numéros de ligne
   tabsize=3,
-  columns=fullflexible,
-  escapeinside={(*}{*)}
+  mathescape,
 }
+
+\setmonofont{Source Code Pro}
 
 % Configuration
 \renewcommand{\familydefault}{\sfdefault}
 
-\sectionfont{\fontsize{12}{15}\selectfont}
-\subsectionfont{\fontsize{10}{12}\selectfont}
+\titleformat{\section}
+  {\sffamily\bfseries\fontsize{12}{15}\selectfont} % ajoute  si tu veux en gras
+  {}{0pt}{}
 
-\allsectionsfont{\sffamily\underline}
+\titleformat{\subsection}
+  {\sffamily\bfseries\fontsize{9}{11}\selectfont}
+  {}{0pt}{}
+
+\titleformat{\subsubsection}
+  {\sffamily\bfseries\fontsize{8}{10}\selectfont}
+  {}{0pt}{}
+
+% Espacements (les tiens, inchangés)
+\titlespacing*{\section}{0pt}{0ex plus .1ex minus 0.5ex}{0.5ex plus .1ex minus 0.2ex}
+\titlespacing*{\subsection}{0pt}{0.1ex plus .1ex minus 0.5ex}{0.5ex plus .1ex minus 0.2ex}
+\titlespacing*{\subsubsection}{0pt}{0.1ex plus .1ex minus 0.5ex}{0.5ex plus .1ex minus 0.2ex}
 
 % No pages numbering
 \pagenumbering{gobble}
-
-% Titles and paragraphs more compact
-\titlespacing*{\section}{0pt}{0pt}{0pt}
-\titlespacing*{\subsection}{0pt}{0pt}{0pt}
 
 \newlength\mybaselinestretch
 \mybaselinestretch=0pt plus 0.02pt\relax
@@ -70,12 +76,13 @@
 \newcommand{\etc}{\small \ldots}
 \newcommand{\any}{$\hzigzag$~}
 \newcommand{\spc}{$\mathvisiblespace$}
-\newcommand{\cd}{\lstinline}
+%\newcommand{\cd}{\lstinline}
+\newcommand{\cd}[1]{\mintinline{cpp}{#1}}
 
 \begin{document}
-
-\begin{multicols*}{3}
-
+\raggedcolumns
+\begin{multicols*}{4}
+    \raggedbottom
     \begin{tabularx}{\columnwidth}{lX}
         \raisebox{-\totalheight}{\includegraphics[width=1cm]{assets/heig-vd-black.pdf}} &
         \begin{center}
@@ -91,47 +98,43 @@
     Ci-dessous, la signification des termes utilisés dans cette carte de référence.
 
     \begin{tabularx}{\linewidth}{
-            >{\hsize=0.5\hsize}X% 10% of 4\hsize
+            >{\hsize=0.4\hsize}X% 10% of 4\hsize
             >{\hsize=1.5\hsize}X% 30% of 4\hsize
-            >{\hsize=0.5\hsize}X% 30% of 4\hsize
+            >{\hsize=0.4\hsize}X% 30% of 4\hsize
             >{\hsize=1.5\hsize}X% 30% of 4\hsize
             % sum=4.0\hsize for 4 columns
         }
 
-        \tt \etc      & Continuation logique      & \tt \any  & N'importe quoi d'accepté     \\
+        \tt \etc      & Continuation logique      & \tt \any  & N'importe quoi \\
         \tt /\any/    & Expression régulière      & \tt \spc  & Espace obligatoire           \\
-        \cd{type}     & \tt int, long, float, ... & \cd{name} & \tt /[A-Za-z][A-Za-z0-9\_]+/ \\
+        \cd{type}     & \tt int, long, float... & \cd{name} & \tt /[A-Za-z][A-Za-z0-9\_]+/ \\
         \cd{value}    & Valeur                    & \cd{NAME} & \tt /[A-Z][A-Z0-9\_]+/       \\
-        \cd{filename} & Chemin de fichier relatif & \cd{expr} & e.g. \tt a + b               \\
+        \cd{fname} & Chemin de fichier relatif & \cd{expr} & e.g. \tt a + b               \\
     \end{tabularx}
     \hrule
 
     \section*{Différences C/C++}
-    \begin{lstlisting}
-sizeof('c') == sizeof(char) == 1 // Différence par rapport au C
-void func();                     // func n'accepte aucun arguments
-int *ip = nullptr;               // Utiliser à la place de NULL
-#include <cstdio>                // Au lieu de <stdio.h> (pas de .h)
-\end{lstlisting}
+    \begin{cppcode}
+void func();         // n'accepte aucun arguments
+int *ip = nullptr;   // Utiliser à la place de NULL
+#include <cstdio>    // Au lieu de <stdio.h> (pas de .h)
+\end{cppcode}
 
-    \section*{Généralités et spécificités}
+\section*{Généralités et spécificités}
 
-    \begin{lstlisting}
+\begin{cppcode}
 // Surcharge de fonctions
 void say(char const* s) { printf("%s\n", s); }
 void say(int u) { printf("%d\n", u); }
-void main() { say("Hello"); say(15); }
+int main() { say("Hello"); say(15); } // Selon type
 
 // Arguments par défaut
 void foo(int a = 1, int b = 4) { ... }
-void main() {
-   foo();      // a = 1, b = 4
-   foo(20);    // a = 20, b = 4
-   foo(20, 5); // a = 20, b = 5
-}
+int main() { foo();     // a = 1, b = 4
+              foo(20); } // a = 20, b = 4
 
-for(auto x : iterable)   // Boucle itérative sur itérable
-int& r = x;             // Référence r sur x
+for(auto x : iterable)  // x est une copie
+for(auto& x : iterable) // x est une référence
 
 // Initializer lists
 std::vector<int> v{1, 2, 3, 4, 5};
@@ -140,356 +143,347 @@ std::map<std::string, int> m{{"a", 1}, {"b", 2}};
 // Uniform initialization
 int x{42};
 std::string s{"Hello"};
-\end{lstlisting}
 
-    \section*{Entrées sorties (streams)}
+// Decltype et auto
+int x = 42;
+decltype(x) z = 10; // Extrait le type de x (ici int)
+auto y = 3.14;      // Type déduit (ici double)
 
-    \begin{lstlisting}
+// Constexpr (évaluation à la compilation)
+constexpr int square(int x) { return x * x; }
+int arr[square(5)]; // Taille connue à la compilation
+constexpr double pi = 3.14159265358979323846;
+
+// Likely/Unlikely (C++20)
+if (x > 0) [[likely]] { ... } else [[unlikely]] { ... }
+if (likely(x > 0)) { ... } else { ... } // C++23
+\end{cppcode}
+\section*{Entrées sorties (streams)}
+
+\begin{cppcode}
 #include <iostream>
-using namespace std; // Les streams dans l'espace de nom std
+using namespace std; // Évite std:: avant cout, cin...
 int main() {
    int i;
-   cout << "Enter your favorite number:\n";
-   cin >> i;
-   cout << "Your favorite number is " << i << "\n";
-   cerr << "An error message" << endl;
-}
-\end{lstlisting}
+   cout << "Enter your favorite number:\n"; // Lecture
+   cin >> i;                                // Écriture
+   cout << "Number: " << i << "\n";         // Format
+   cerr << "An error message" << endl; }    // Stderr
+\end{cppcode}
 
-    \section*{Chaînes de caractère}
+\section*{Chaînes de caractère}
 
-    \begin{lstlisting}
+\begin{cppcode}
 #include <string>
 
 string a = "Hello", b = "World";
-cout << a + b; // "Hello World"
+cout << a + " " + b; // "Hello World"
 cout << a + " You"; // "Hello You"
 a.append(" Dog"); // En C++ les chaînes sont modifiables
-cout << a; // "Hello Dog"
-\end{lstlisting}
+
+\end{cppcode}
 
     \section*{Références}
 
-    \begin{lstlisting}
-string foo = "I am foo";
-string& fooRef = foo; // Référence sur foo
-fooRef += ". Hi!"; // Modifie foo via la référence
-cout << fooRef; // Affiche "I am foo. Hi!"
-
+    \begin{cppcode}
+string foo = "foo";
+string& fooRef = foo;    // Référence sur foo
+fooRef += "bar";         // Modifie foo via la référence
+cout << foo;             // Affiche "foobar"
 cout << &fooRef << endl; // Affiche l'adresse de foo
-string bar = "I am bar";
-fooRef = bar;
-cout << &fooRef << endl; // Affiche toujours l'adresse de foo
-cout << fooRef; // Affiche "I am bar"
+fooRef = string("bar");  // Copie de la valeur dans foo
 
-const string& barRef = bar;
-barRef += ". Hi!"; // Erreur !
-
-// Objets temporaires
-string foo() { ... }
-string retVal = foo(); // Valeur de retour est temporaire
-
-void bar() {
-  const string& constRef = foo();
-  // Référence valide jusqu'à la fin de la fonction
-}
+const string& cbarRef = foo;
+cbarRef += ". Hi!";       // Erreur ! cbarRef est const
 
 string str;
-void func(string& s) { ... } // Référence standard
+void func(string& s) { ... }  // Référence standard
 void func(string&& s) { ... } // Référence temporaire
 func(str); // Référence standard
 func(foo()); // Référence temporaire
+\end{cppcode}
 
-\end{lstlisting}
+\section*{Flux}
+\begin{cppcode}
+double x = 3.141592;
+cout << std::fixed; // Format décimal fixe
+cout.precision(2);  // 2 chiffres après la virgule
+cout << x << endl;  // Affiche 3.14
+cout << std::scientific; // Format scientifique (3.14e+00)
+cout << std::setw(5) << std::setprecision(3) << x; "%+5.3f"
+cout << "\n" << std::endl; // préférez \n, endl flush le flux
+\end{cppcode}
 
-    \section*{Enumérations}
+\section*{Enumérations}
 
-    \begin{lstlisting}
-enum AnimalTypes {
-    Mammals, Birds, Reptiles, Amphibians, Fish
-};
+\begin{cppcode}
+// Enumérations non typées
+enum AnimalTypes { Mammals, Birds, Reptiles, Fish };
+AnimalTypes GetAnimalType() { return Reptiles; }
 
-AnimalTypes GetAnimalType() {
-    return Reptiles;
-}
+// Enumérations typées (cast implicite en uint_8)
+enum Amphibians : uint8_t { Frogs, Toads=2 };
 
-enum Amphibians : uint8_t {
-    Frogs, // 0
-    Newts, // 1
-    Salamanders = 42, // 42
-    Toads // 43
-}; // Peut être implicitement casté en uint8_t
+// Enum fortement typées (pas de cast implicite)
+enum class Birds : uint8_t { Chickens, Ducks };
+\end{cppcode}
 
-enum class Birds : uint8_t {
-    Chickens, Hummingbirds
-}; // Ne sera pas implicitement casté
-\end{lstlisting}
+\section*{Templates}
 
-    \section*{Templates}
+\begin{cppcode}
+template <class T> T f(T t);  // Template à 1 paramètre T
+template <class T> class X {  // Classe avec paramètre T
+   X(T t); };                 // Constructeur
+template <class T>
+   X<T>::X(T t) {}            // Impl. du constructeur
+X<int> x{3};                  // Un objet de type X de int
+template <class T, class U=T> // Valeurs par défaut
 
-    \begin{lstlisting}
-template<class T>
-class Box {
-public:
-    void insert(const T&) { ... }
-};
+Box<Box<int> > boxOfBox;  // Template imbriquées
+                          // Espace après > requis en C++03
 
-Box<int> intBox;
-intBox.insert(42);
+template<int Y=23> void p() { // Paramètre scalaire
+   cout << "You said " << Y; }// Affiche "You said 23"
 
-Box<Box<int> > boxOfBox;                // Template imbriquées
-boxOfBox.insert(intBox);
-
-template <class T> T f(T t);            // Surcharge f pour tous les types
-template <class T> class X {            // Classe avec paramètre T
-   X(T t); };                           // Constructeur
-template <class T> X<T>::X(T t) {}      // Définition du constructeur
-X<int> x(3);                            // Un objet de type X de int
-template <class T, class U=T, int n=0>  // Template avec paramètres par défaults
-
-// Paramètres
-template<int Y>
-void printMessage() {
-   cout << "Your number is " << Y << endl;
-}
-
-// Spécialisation
-template<>
-void printMessage<42>() {
-   cout << "You said 42!" << endl;
-}
-printMessage<23>(); // Your number is 23
-printMessage<42>(); // You said 42!
-
-\end{lstlisting}
+template<>                    // Spécialisation
+void p<42>() {                // (implémentation spécifique
+   cout << "The Answer!\n"; } //  pour la valeur 42)
+p<12>(); // You said 12
+p<42>(); // The Answer!
+\end{cppcode}
 
     \section*{Namespaces}
 
-    \begin{lstlisting}
-extern "C" { void f(); }    // Si f() a été compilé dans un objet C
-namespace N { class T {}; } // Cache la classe T dans le namespace N
-N::T t;                     // Utilise le nom T du namespace N
-using namespace N;          // Rends T visible sans préfix N::
+    \begin{cppcode}
+extern "C" { void f(); }    // Si f() compilé dans un obj C
+namespace N { class T {}; } // Cache la classe T dans N
+N::T t;                     // Accès avec opérateur ::
+using namespace N;          // Rend T visible sans préfix
+using namespace std;        // Pour éviter std::xxx
+\end{cppcode}
 
-using namespace std;        // Permet les appels standards sans std::
+\section*{Classes}
+\begin{cppcode}
+struct S { int x; }; // Membres public par défaut
+class  C { int x; }; // Membres privé par défaut
 
-namespace First {
-    namespace Nested {
-        void foo() {
-            printf("This is First::Nested::foo\n");
-        }
-    }
-}
-namespace Second {
-    void foo() {
-        printf("This is Second::foo\n");
-    }
-}
-void foo() {
-    printf("This is global foo\n");
-}
+class Foo; // Déclaration anticipée
 
-int main() {
-    using namespace Second;
-    Second::foo();
-    First::Nested::foo();
-    ::foo(); // Global foo
-    foo(); // Erreur car ambïgu
-}
-\end{lstlisting}
+// Membres par défaut
+struct A {
+  A();                    // 1. Constructeur par défaut
+  A(const A&);            // 2. Constructeur de copie
+  A& operator=(const A&); // 3. Opérateur d'assignation
+  A(A&&);                 // 4. Constructeur de déplacement
+  A& operator=(A&&);      // 5. Opérateur de déplacement
+  ~A();                   // 6. Destructeur
+}; // Point virgule obligatoire
 
-    \section*{Classes}
+// Rule-of-zero:
+// préférer le cas d'utiliser toutes définitions par défaut
+// Rule-of-three:
+// toujours définir 2, 3, 6 si une des 3 est définie
+// Rule-of-five:
+// toujours définir 2, 3, 4, 5, 6 si une des 5 est définie
 
-    \begin{lstlisting}
-// Généralement déclaré dans un .h (ou .hpp)
 class Dog {
     std::string name; // Privé par défaut (private:)
-    int weight;
+    int weight = 0; // Initialisation par défaut (C++11)
+    mutable int age = 0; // Modifiable même si const
+    std::vector<std::string> nicknames;
 public:
     Dog(); // Constructeur par défaut
 
+    // Constructeur avec members initializer list
+    Dog(std::string n, int w=0) : name{n}, weight(w) {}
+
     // Constructeur avec liste d'initialisation
-    Dog(std::string name, int weight=0) : name{name}, weight(weight)
-    { ... }
+    Dog(std::initializer_list<std::string> nicks)
+        : nicknames(nicks), age(0) {}
+
     void setName(const std::string& dogsName);
     void setWeight(int dogsWeight);
 
-    // Si marqué const, la méthode ne modifie pas l'état
-    // de l'objet.
-    virtual void print() const;
+    void print() const; // const: ne modifie pas l'objet
 
     // Méthode définie dans le body d'une classe
     void bark() const { std::cout << name << " barks!" << endl; }
 
-    // Déstructeur doit être virtuel si peut être dérivé
-    virtual ~Dog();
+}; // Ne pas oublier le point-virgule!
 
-protected:
-    // Accès possible aux classes dérivées
-
-}; // N'oubliez pas le point-virgule!
-
-// Déclaration implémentée dans un .cpp
+// Implémentation externe des méthodes
 Dog::Dog() {
     std::cout << "A dog has been constructed\n";
 }
 
-Dog::~Dog() {
-    std::cout << "Goodbye " << name << "\n";
-}
-
-int main() {
-    Dog myDog; // Affiche "A dog has been constructed"
-    myDog.setName("Barkley");
-    myDog.setWeight(10);
-} // Print "Goodbye Barkley"
-\end{lstlisting}
-
-    \section*{Héritage et polymorphisme}
-
-    \begin{lstlisting}
-class OwnedDog : public Dog {
-public:
-    void setOwner(const std::string& dogsOwner);
-    void print() const override; // Surcharge
-private:
-    std::string owner;
+class C {
+    C() = default; // Constructeur par défaut
+    C(const C&) = delete; // Interdit la copie
+    virtual ~C() = default; // Destructeur virtuel
+    void f() const; // Méthode constante
+    void f() noexcept; // Ne lance pas d'exception
+    static int count; // Attribut statique (partagé)
+    static int getCount(); // Méthode statique
 };
+\end{cppcode}
 
-void OwnedDog::print() const {
-    Dog::print(); // Appel de la méthode du parent
-    std::cout << "Dog is owned by " << owner << endl;
-}
-\end{lstlisting}
+\section*{Interfaces}
+\begin{cppcode}
+// Interface = uniquement des méthodes virtuelles pures
+class Shape {
+    // Normalement pas d'attributs dans une interface
+    virtual double area() const = 0;
+    virtual ~Shape() = default;
+};
+\end{cppcode}
 
-    \section*{Polymorphisme}
+\section*{Héritage et polymorphisme}
+\begin{cppcode}
+class Triangle : public Shape { // Héritage public
+    double base, height;
+public:
+    Triangle(double b, double h)
+        : base(b), height(h) {}
+    double area() const override { // Override
+        return 0.5 * base * height; }
+};
+class Bar : public Foo {
+    using Foo::Foo; }; // Hérite des constructeurs
 
-    \begin{lstlisting}
-T operator+(T x, T y);  // Surcharge opérateur addition de type T
-T operator-(T x);       // Surcharge opérateur unaire de negation -x
-T operator++(int);      // Surcharge opérateur postfix
+void D::m() const {
+    C::m(); } // Appel de la méthode du parent
+\end{cppcode}
 
-\end{lstlisting}
+\section*{Polymorphisme}
 
-    \section*{Exceptions}
+\begin{cppcode}
+// Surcharge d'opérateurs
+T operator+(T x, T y);  // Surcharge +
+T operator-(T x);       // Surcharge -x
+T operator++(int);      // Surcharge x++ (postfixe)
+T& operator++();        // Surcharge ++x (préfixe)
+auto operator<=>(const P&) const = default;  // C++20 spaceship
 
-    \begin{lstlisting}
+// Surcharge de flux
+template <class T>
+std::ostream& operator<<(std::ostream& os, const T& t) {
+    os << t.member; return os; }
+\end{cppcode}
+
+\section*{Exceptions}
+
+\begin{cppcode}
 #include <exception>
 #include <stdexcept>
 
 try {
-   throw std::runtime_error("A problem occured");
-}
+   throw std::runtime_error("A problem occured"); }
 catch (const std::exception& ex) {
-   std::cout << ex.what();
-}
+   std::cout << ex.what(); }
 catch (...) {
    std::cout << "Unknown exception caught";
-   throw; // Relève l'exception
-}
-\end{lstlisting}
+   throw; } // Relève l'exception
 
-    \section*{Conteneurs de données}
+\end{cppcode}
 
-    \subsection*{Vector}
+\section*{Conteneurs de données}
 
-    \begin{lstlisting}
+\subsection*{Vector}
+Tableau dynamique: capacité augmente de façon amortie (impl.-dépendant).
+\begin{cppcode}
 #include <vector>
 
-string val;
-vector<string> vect;
-cin >> val;
-vect.push_back(val); // Ajoute à la fin
-vect.pop_back();  // Enlève à la fin
-vect.insert(vect.begin(), val); // Insertion au début
-vect.erase(vect.begin()); // Efface une position
-vect.erase(vect.begin(), vect.begin() + 2); // Efface un intervalle
+vector<string> v;
+v.push_back(42); // Ajoute à la fin
+v.back();        // Dernier élément
+v.pop_back();    // Enlève à la fin
+v.front();       // Premier élément
+v[0];            // Accès direct (non sécurisé)
+v.at(1);         // Accès sécurisé (vérifie les bornes)
+v.clear();       // Vide le vecteur
+v.insert(v.end(), 42); // Insertion à la fin O(1)
+v.insert(v.begin(), 42); // Insertion au début O(n)
+v.erase(v.begin()); // Efface une position O(n)
+v.erase(v.begin(), v.begin() + 2); // Efface un intervalle O(n)
+v.empty() // Vrai si vide
+v.size()  // Nombre d'éléments
 
-// Accès sécurisé
-if (!vect.empty()) {
-    cout << vect[0] << " " << vect.at(1); // at() vérifie les bornes
-}
-cout << "Size: " << vect.size() << endl;
+vector<int> w(10, 42); // 10 éléments initialisés à 42
+v.reserve(100); // Réserve de la place pour 100 éléments
+v.resize(50);  // Redimensionne à 50 éléments (ajoute des zéros)
 
-\end{lstlisting}
+// Pour stocker des références
+std::vector<std::reference_wrapper<int>> v;
+int a=1, b=2; v.push_back(a); v.push_back(b);
+\end{cppcode}
 
-    \subsection*{Tuples (Liste non-modifiable)}
+\subsection*{Tuples (Liste non-modifiable)}
 
-    \begin{lstlisting}
+\begin{cppcode}
 #include <tuple>
 
-auto x = make_tuple(10, 'A');
-const int maxN = 1e9;
-const int maxL = 15;
-auto y = make_tuple(maxN, maxL);
+tuple<int, char> x = make_tuple(10, 'A'); // auto accepté
 
-// Affichage
-cout << get<0>(x) << " " << get<1>(x) << "\n"; // Affiche "10 A"
-cout << get<0>(y) << " " << get<1>(y) << "\n"; // Affiche "1000000000 15"
+get<0>(x) = 20; // Modifie le premier élément
+char w = get<1>(x); // Copie le deuxième élément
 
-// Unpacking
-int i;
-int c;
-tie(i, c) = x;
+int i, c;
+tie(i, c) = x; // Unpacking
 
 tuple<int, char, double> z(11, 'A', 3.1415);
+auto size = tuple_size<decltype(z)>::value;
 
-cout << tuple_size<decltype(z)>::value << "\n"; // Affiche 3
+auto concatenated = tuple_cat(x, z);
+\end{cppcode}
 
-auto concatenated = tuple_cat(x, y, z); // (10, 'A', 1e9, 15, 11, 'A', 3.1415)
-
-\end{lstlisting}
-
-    \subsection*{Map (Association clé-valeur)}
-
-    \begin{lstlisting}
+\subsection*{Map (Association clé-valeur)}
+Unordered map implémenté avec une table de hachage (O(1))\\
+Map implémenté avec un arbre binaire équilibré (log n)
+\begin{cppcode}
 #include <map>
 
-map<char, int> mymap;
-mymap.insert(pair<char,int>('A', 1));
-mymap.insert(pair<char,int>('Z', 26));
-map<char,int>::iterator it;
+map<char, int> m;
+m.insert(pair<char,int>('A', 1)); // m['A'] = 1; possible
+m.insert(pair<char,int>('Z', 26));
 
-// Affiche A->1, Z->26
-for (it=mymap.begin(); it!=mymap.end(); ++it)
+map<char, int>::iterator it; // Itérateur
+for (it=m.begin(); it!=m.end(); ++it)
     std::cout << it->first << "->" << it->second << ', ';
 
-it = mymap.find('Z');
+it = m.find('Z');
 cout << it->second; // Affiche 26
 
-#include <unordered_map> // Plus performant mais ordre non préservé
+#include <unordered_map>
+unordered_map<char, int> um;
+um['A'] = 1; um['Z'] = 26;
+\end{cppcode}
 
-\end{lstlisting}
+\subsection*{Set (Ensemble de valeurs uniques)}
 
-    \subsection*{Set (Ensemble de valeurs uniques)}
-
-    \begin{lstlisting}
+\begin{cppcode}
 #include <set>
-set<int> ST;
-ST.insert(4);
-ST.insert(8);
-ST.insert(15);
-ST.erase(8);
+set<int> s;
+s.insert(4);
+s.insert(15);
+s.erase(8);
 
 set<int>::iterator it;
-for(it=ST.begin(); it!=ST.end(); it++) {
-    cout << *it << endl;
-}
-ST.clear();
-cout << ST.size(); // Affiche zéro
+for(it=s.begin(); it!=s.end(); it++) {
+    cout << *it << endl; }
+s.clear();
+cout << s.size(); // Affiche zéro
+\end{cppcode}
 
-\end{lstlisting}
+\section*{Algorithmes STL essentiels}
 
-    \section*{Algorithmes STL essentiels}
-
-    \begin{lstlisting}
+\begin{cppcode}
 #include <algorithm>
 #include <numeric>
 
 std::vector<int> v{3, 1, 4, 1, 5};
 
-// Tri
-std::sort(v.begin(), v.end());
+std::sort(v.begin(), v.end()); // Tri croissant
+std::reverse(v.begin(), v.end()); // Tri décroissant
 
 // Recherche
 auto it = std::find(v.begin(), v.end(), 4);
@@ -497,143 +491,187 @@ bool found = (it != v.end());
 
 // Transformation
 std::vector<int> v2(v.size());
-std::transform(v.begin(), v.end(), v2.begin(), 
+std::transform(v.begin(), v.end(), v2.begin(),
                [](int x) { return x * 2; });
 
 // Réduction
-int sum = std::accumulate(v.begin(), v.end(), 0);
+// Type retour celui de valeur initiale (ici int)
+auto sum = std::accumulate(v.begin(), v.end(), 0);
 
 // Filtrage (C++20 style avec remove_if)
-v.erase(std::remove_if(v.begin(), v.end(), 
-                       [](int x) { return x % 2 == 0; }), 
+v.erase(std::remove_if(v.begin(), v.end(),
+                       [](int x) { return x % 2 == 0; }),
         v.end());
+\end{cppcode}
 
-\end{lstlisting}
+\section*{Fonctions anonymes (lambda)}
 
-    \section*{Fonctions anonymes (lambda)}
+\begin{cppcode}
 
-    \begin{lstlisting}
-vector<pair<int, int> > tester;
-tester.push_back(make_pair(3,6));
-tester.push_back(make_pair(1,9));
-tester.push_back(make_pair(5,0));
+vector<pair<int, int> > v{{1,2}, {3,4}, {5,6}};
 sort(
-    tester.begin(),
-    tester.end(),
+    v.begin(), v.end(),
     [](const pair<int, int>& lhs, const pair<int, int>& rhs) {
-        return lhs.second < rhs.second;
-    }
-);
+        return lhs.second < rhs.second; });
 
-struct S { void f(int i); };
-void S::f(int i) {
-    [&, i]{};      // Ok
-    [&, &i]{};     // Erreur : i précédé par & quand & est le défaut
-    [=, this]{};   // Erreur : this quand = est défaut
-    [=, *this]{ }; // OK
-    [i, i]{};      // Erreur : i répété
-}
-\end{lstlisting}
+// Format: [captures](params) -> ret { body }
+int x = 5; int y = 10;
+auto g = [x, &y](int z) -> int { return x + y++ + z; };
 
-    \section*{Tokens alternatifs}
+// Formats de capture
+[&]{}; [=]{}; // 1. Tout par référence, 2. tout par valeur
+[&, i]{}; // Scope local par référence, i par valeur
+[&, &i]{}; // Erreur, incohérent
+[this]{};   // Cette instance par référence
+[*this]{}; // Cette instance par valeur (copie)
+\end{cppcode}
 
-    \begin{lstlisting}
-true and false          // Conjonction logique
-true or false           // Disjonction logique
-not true                // Négation logique
+\section*{Tokens alternatifs}
+\begin{cppcode}
+true and false     // Conjonction logique
+true or false      // Disjonction logique
+not true           // Négation logique
+compl 4            // Complément bit à bit
+4 bitor 3          // Disjonction bit à bit
+4 bitand 3         // Conjonction bit à bit
+4 xor 3            // Disjonction exclusive bit à bit
+\end{cppcode}
 
-compl 4
-4 bitor 3               // Disjonction bit à bit
-4 bitand 3              // Conjonction bit à bit
-4 xor 3                 // Disjonction exclusive bit à bit
-\end{lstlisting}
-
-    \section*{Smart Pointer}
-
-    \begin{lstlisting}
+\section*{Smart Pointer}
+\begin{cppcode}
 #include <memory>
 
-// shared_ptr - propriété partagée
-std::shared_ptr<Dog> doggo(new Dog());
-// ou mieux:
-auto doggo = std::make_shared<Dog>();
+std::shared_ptr<Dog> doggo(new Dog()); // Ancien style
+auto doggo = std::make_shared<Dog>();  // Préféré
 doggo->bark();
-// Pas besoin de supprimer le Dog.
+// Pas besoin de supprimer le Dog, destruction auto
 
-// unique_ptr - propriété exclusive
+// Propriété exclusive
 std::unique_ptr<Dog> dog = std::make_unique<Dog>();
-std::unique_ptr<Dog> dog2 = std::move(dog); // Transfert de propriété
+// Transfert de propriété
+std::unique_ptr<Dog> dog2 = std::move(dog);
 
-// weak_ptr - référence faible (évite cycles)
+// Référence faible (évite cycles)
+// Utilisé comme observateur non possédant
 std::weak_ptr<Dog> weak_dog = doggo;
 if (auto strong_dog = weak_dog.lock()) {
     strong_dog->bark(); // Utilisation sécurisée
 }
+\end{cppcode}
 
-\end{lstlisting}
-
-    \section*{RAII et Rule of Five}
-
-    \begin{lstlisting}
-// RAII (Resource Acquisition Is Initialization)
-class ResourceManager {
-    FILE* file;
-public:
-    ResourceManager(const char* filename) 
-        : file(fopen(filename, "r")) {
-        if (!file) throw std::runtime_error("Cannot open file");
-    }
-    
-    ~ResourceManager() { 
-        if (file) fclose(file); // Libération automatique
-    }
-    
-    // Rule of Five (si vous gérez des ressources)
-    ResourceManager(const ResourceManager&) = delete;            // Copy ctor
-    ResourceManager& operator=(const ResourceManager&) = delete; // Copy assign
-    ResourceManager(ResourceManager&& other) noexcept           // Move ctor
-        : file(other.file) { other.file = nullptr; }
-    ResourceManager& operator=(ResourceManager&& other) noexcept; // Move assign
-    // Destructor déjà défini
-};
-
-\end{lstlisting}
-
-    \section*{Move semantics et constexpr}
-
-    \begin{lstlisting}
-// Move semantics
-std::vector<int> createVector() {
-    std::vector<int> v = {1, 2, 3, 4, 5};
-    return v; // Move automatique
-}
-
-class MyClass {
-public:
-    // Move constructor
-    MyClass(MyClass&& other) noexcept 
-        : data(std::move(other.data)) {}
-    
-    // Move assignment
-    MyClass& operator=(MyClass&& other) noexcept {
-        data = std::move(other.data);
-        return *this;
-    }
-private:
-    std::string data;
-};
-
-// constexpr - évaluation à la compilation
+\section*{Constexpr}
+\begin{cppcode}
+    // constexpr - évaluation à la compilation
 constexpr int factorial(int n) {
     return n <= 1 ? 1 : n * factorial(n - 1);
 }
 constexpr int result = factorial(5); // Calculé à la compilation
+\end{cppcode}
 
-// auto et decltype
-auto x = 42;        // int
-auto y = 3.14;      // double
-decltype(x) z = 10; // int
+\section*{Move semantics}
 
+\begin{cppcode}
+std::vector<int> v1 = {1,2,3,4,5};
+std::vector<int> v2 = v1; // Copie (lent)
+std::vector<int> v3 = std::move(v1); // Transfert (rapide)
+
+class C {
+    using value_type = std::string;
+    C(value_type s) : data(s) {}
+    C(C&& other) noexcept
+        : data(std::move(other.data)) {}
+    C& operator=(C&& other) noexcept {
+        data = std::move(other.data);
+        return *this; }
+private:
+    value_type data;
+};
+C a("X");
+C b = std::move(a); // Construction par déplacement
+b = std::move(a);   // Assignation par déplacement
+\end{cppcode}
+
+\section*{Ranges (C++20)}
+
+\begin{cppcode}
+// Inclure <ranges>, <vector>, <algorithm>, <iostream>
+std::vector<int> v{1,2,3,4,5,6,7,8,9,10};
+
+// Pipeline ranges: filtre puis transforme
+auto rng = v
+    | std::views::filter([](int x){ return x % 2 == 0; })
+    | std::views::transform([](int x){ return x * x; });
+
+for (int x : rng) std::cout << x << ' '; // 4 16 36 64 100
+
+// Prise de tête zéro : lazy, pas de copies inutiles
+// Raccourcis utiles:
+auto first3 = rng | std::views::take(3);
+auto rev    = rng | std::views::reverse;
+
+// Conversion en conteneur:
+std::vector<int> out;
+std::ranges::copy(rng, std::back_inserter(out));
+\end{cppcode}
+
+\section*{Slices et Vues (C++20)}
+
+\begin{cppcode}
+#include <span>
+#include <string_view>
+#include <vector>
+
+// std::span : vue non-propriétaire sur un bloc contigu
+// (T[], vector<T>, array<T,N>) n'alloue pas,
+// ne possède pas, "slice" sans copie.
+void sum_all(std::span<const int> s) {
+    long long sum = 0;
+    for (int x : s) sum += x;
+    /* ... */
+}
+
+std::vector<int> v{1,2,3,4,5};
+sum_all(v);              // conversion implicite vers span
+sum_all(std::span{v}.subspan(1,3)); // slice [2,3,4]
+
+// std::string_view : vue en lecture seule sur une chaîne
+void print_sv(std::string_view sv) { /* pas de copie */ }
+
+std::string s = "hello world";
+print_sv(s);
+print_sv("abc");                  // littéral → string_view
+print_sv(std::string_view{s}.substr(6, 5)); // "world"
+\end{cppcode}
+
+\section*{Traits et Concepts (C++20)}
+
+\begin{cppcode}
+// Inclure <type_traits>, <concepts>, <vector>, <list>
+
+// Traits classiques (C++11/14/17)
+static_assert(std::is_integral_v<int>);
+static_assert(!std::is_pointer_v<int>);
+
+// Concepts standards
+template<std::integral T>
+T add(T a, T b) { return a + b; }
+
+// Concept personnalisé
+template<typename T>
+concept HasSize = requires(T t) {
+    { t.size() } -> std::convertible_to<std::size_t>;
+};
+
+template<HasSize C>
+auto size2(const C& c) { return c.size() * 2; }
+
+static_assert(std::ranges::range<std::vector<int>>);
+static_assert(!std::ranges::range<int>);
+\end{cppcode}
+
+\section*{Divers}
+
+\begin{cppcode}
 // C++17: structured bindings
 auto [key, value] = std::make_pair("hello", 42);
 std::map<std::string, int> m{{"a", 1}, {"b", 2}};
@@ -641,7 +679,7 @@ for (const auto& [k, v] : m) {
     std::cout << k << ": " << v << "\n";
 }
 
-// C++17: if constexpr
+// if constexpr (C++17) évaluation à la compilation
 template<typename T>
 void process(T value) {
     if constexpr (std::is_integral_v<T>) {
@@ -650,12 +688,10 @@ void process(T value) {
         // Code pour les autres types
     }
 }
+\end{cppcode}
 
-\end{lstlisting}
-
-    \section*{Thread safety et concurrence}
-
-    \begin{lstlisting}
+\section*{Thread safety et concurrence}
+\begin{cppcode}
 #include <thread>
 #include <mutex>
 #include <atomic>
@@ -675,31 +711,70 @@ void safe_function() {
 std::atomic<int> counter{0};
 counter++; // Thread-safe
 
-\end{lstlisting}
+\end{cppcode}
 
-    \section*{Étrangetés}
+\section*{Utilitaires modernes}
 
-    \begin{lstlisting}
+\begin{cppcode}
+// <optional> (C++17)
+std::optional<int> parse_int(std::string_view s);
+if (auto v = parse_int("42")) { /* v.value() */ }
+
+// <variant> (somme de types)
+std::variant<int, std::string> u = 42;
+u = std::string{"hi"};
+
+// <filesystem> (C++17)
+namespace fs = std::filesystem;
+for (auto& p : fs::directory_iterator(".")) {
+    if (p.is_regular_file()) std::cout << p.path() << '\n';
+}
+
+// <chrono> (durées & time points)
+using namespace std::chrono_literals;
+auto t = 150ms + 2s;
+
+// <format> (C++20) <print> (C++23)
+std::string s = std::format("Hello {}, value = {}", "world", 42);
+std::print("Pi ~ {:.3f}\n", 3.14159); // C++23
+\end{cppcode}
+
+\section*{Étrangetés}
+
+\begin{cppcode}
 // Surcharge de méthode privées
 class Foo {
 private:
    virtual void bar();
 };
 class FooSub : public Foo {
-   virtual void bar();      // Surcharge Foo::bar!
+   virtual void bar() override;      // Surcharge Foo::bar!
 };
 
 assert(0 == false and false == nullptr); // La plupart du temps
-\end{lstlisting}
+\end{cppcode}
 
-    \section*{S.O.L.I.D.}
-    \begin{description}
-        \item[S] Single responsibility principle
-        \item[O] Open for extension, closed for modification
-        \item[L] Liskov substition principle
-        \item[I] Interface segregation principle
-        \item[D] Dependency inversion principle
-    \end{description}
+\section*{Optimisation}
+\begin{cppcode}
+// Objets temporaires
+string foo() { return string("foo"); }
+string retVal = foo(); // Choix selon optimisation:
+// 1. Copie inutile d'un objet temporaire (< C++11)
+// 2. Copy elision, suppression de la copie (C++17)
+// 3. Utilisation de move semantics si disponible
+
+return std::string("hello") // RVO (Return Value Optim.)
+return result; // NRVO (Named Return Value Optimization)
+\end{cppcode}
+
+\section*{S.O.L.I.D.}
+\begin{description}
+    \item[S] Single responsibility principle
+    \item[O] Open for extension, closed for modification
+    \item[L] Liskov substition principle
+    \item[I] Interface segregation principle
+    \item[D] Dependency inversion principle
+\end{description}
 
 \end{multicols*}
 \end{document}
