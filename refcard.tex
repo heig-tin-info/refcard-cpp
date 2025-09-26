@@ -40,9 +40,6 @@
 
 \setmonofont{Source Code Pro}
 
-% Configuration
-\renewcommand{\familydefault}{\sfdefault}
-
 \titleformat{\section}
   {\sffamily\bfseries\fontsize{12}{15}\selectfont} % ajoute  si tu veux en gras
   {}{0pt}{}
@@ -156,7 +153,8 @@ constexpr double pi = 3.14159265358979323846;
 
 // Likely/Unlikely (C++20)
 if (x > 0) [[likely]] { ... } else [[unlikely]] { ... }
-if (likely(x > 0)) { ... } else { ... } // C++23
+// C++23 style (plus concis)
+if (likely(x > 0)) { ... } else { ... }
 
 // Assert (debug uniquement)
 static_assert(sizeof(int) == 4, "int doit faire 4 bytes");
@@ -192,18 +190,21 @@ const string& cbarRef = foo;
 cbarRef += ". Hi!";       // Erreur ! cbarRef est const
 
 string str;
-void func(string& s) { ... }  // Référence standard
-void func(string&& s) { ... } // Référence temporaire
-func(str);                    // Référence standard
-func(foo());                  // Référence temporaire
+void func(string& s) { ... }       // Référence lvalue
+void func(string&& s) { ... }      // Référence rvalue  
+func(str);                         // Référence lvalue
+func(string("temp"));              // Référence rvalue
 \end{cppcode}
 
 \section*{Flux / Streams}
 \begin{cppcode}
+#include <iostream>
+#include <iomanip>
+
 int i;
 cin >> i;  // Lecture
 cout << "Number: " << i << "\n";         // Format
-cerr << "An error message" << endl; }    // Stderr
+cerr << "An error message" << endl;    // Stderr
 double x = 3.141592;
 cout << std::fixed; // Format décimal fixe
 cout.precision(2);  // 2 chiffres après la virgule
@@ -220,7 +221,7 @@ cout << "\n" << std::endl; // préférez \n (pas de flush)
 enum AnimalTypes { Mammals, Birds, Reptiles, Fish };
 AnimalTypes GetAnimalType() { return Reptiles; }
 
-// Enumérations typées (cast implicite en uint_8)
+// Enumérations typées (cast implicite en uint8_t)
 enum Amphibians : uint8_t { Frogs, Toads=2 };
 
 // Enum fortement typées (pas de cast implicite)
@@ -238,7 +239,7 @@ template <class T>
 X<int> x{3};                  // Un objet de type X de int
 template <class T, class U=T> // Valeurs par défaut
 
-Box<Box<int> > boxOfBox;  // Template imbriquées
+Box<Box<int>> boxOfBox;   // Templates imbriqués (C++11+)
                           // Espace après > requis en C++03
 
 template<int Y=23> void p() { // Paramètre scalaire
@@ -251,13 +252,13 @@ p<12>(); // You said 12
 p<42>(); // The Answer!
 \end{cppcode}
 
-    \section*{Namespaces}
+\section*{Namespaces}
 
-    \begin{cppcode}
+\begin{cppcode}
 extern "C" { void f(); }    // Si f() compilé dans un obj C
 namespace N { class T {}; } // Cache la classe T dans N
 N::T t;                     // Accès avec opérateur ::
-using namespace N;          // Rend T visible sans préfix
+using namespace N;          // Rend T visible sans préfixe
 using namespace std;        // Pour éviter std::xxx
 \end{cppcode}
 
@@ -378,8 +379,11 @@ std::ostream& operator<<(std::ostream& os, const T& t) {
 \section*{Exceptions}
 
 \begin{cppcode}
-try { // inclure <stdexcept>, <exception>
-   throw std::runtime_error("A problem occured"); }
+#include <stdexcept>
+#include <exception>
+
+try {
+   throw std::runtime_error("A problem occurred"); }
 catch (const std::exception& ex) {
    std::cout << ex.what(); }
 catch (...) {
@@ -523,7 +527,7 @@ std::copy_if(v.begin(), v.end(), std::back_inserter(v3),
 
 \begin{cppcode}
 
-vector<pair<int, int> > v{{1,2}, {3,4}, {5,6}};
+vector<pair<int, int>> v{{1,2}, {3,4}, {5,6}};
 sort(
     v.begin(), v.end(),
     [](const pair<int, int>& lhs, const pair<int, int>& rhs) {
@@ -807,6 +811,22 @@ std::generator<int> fibonacci() {
     while (true) {
         co_yield a; auto next = a + b;
         a = b; b = next; } }
+\end{cppcode}
+
+\section*{Optimisation}
+\begin{cppcode}
+// Conseils de performance essentiels
+// 1. Préférer ++i à i++ pour les itérateurs
+for (auto it = v.begin(); it != v.end(); ++it) { /* ... */ }
+
+// 2. Utiliser const& pour éviter les copies
+void process(const std::vector<int>& v); // Pas de copie
+
+// 3. Réserver la mémoire si taille connue
+std::vector<int> v; v.reserve(1000); // Évite les réallocations
+
+// 4. Move pour les ressources coûteuses
+std::vector<int> v2 = std::move(v1); // Pas de copie
 \end{cppcode}
 
 % \section*{Étrangetés}
