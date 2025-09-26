@@ -82,42 +82,26 @@
 \begin{document}
 \raggedcolumns
 \begin{multicols*}{4}
-    \raggedbottom
-    \begin{tabularx}{\columnwidth}{lX}
-        \raisebox{-\totalheight}{\includegraphics[width=1cm]{assets/heig-vd-black.pdf}} &
-        \begin{center}
-            {\Large \bf Carte de référence C++11/C++23} \\
-            version \revision \ -- \revisiondate \\
-        \end{center}
-    \end{tabularx}
+\raggedbottom
+
+\begin{tabularx}{\columnwidth}{llX}
+    \raisebox{-\totalheight}{\includegraphics[width=1cm]{assets/heig-vd-black.pdf}} & \raisebox{-\totalheight}{\includegraphics[width=0.7cm]{assets/cpp-lang.pdf}} &
+    \begin{center}
+      {\Large \bf Carte de référence C++} \\
+      HEIG-VD -- version \revision \ -- \revisiondate \\
+    \end{center}
+\end{tabularx}
 
     Cette carte de référence peut être utilisée durant les travaux écrits et examens
     des cours \emph{progoo} et \emph{progoox} à moins que le contraire soit explicitement formulé.
     Elle est une liste non exhaustive des possibilités du langage C++ et un complément à la carte de référence du langage C.
-    Ce travail est inspiré de \emph{Learn X in Y} et de la carte de référence de Matt Mahoney.
-    Ci-dessous, la signification des termes utilisés dans cette carte de référence.
 
-    \begin{tabularx}{\linewidth}{
-            >{\hsize=0.4\hsize}X% 10% of 4\hsize
-            >{\hsize=1.5\hsize}X% 30% of 4\hsize
-            >{\hsize=0.4\hsize}X% 30% of 4\hsize
-            >{\hsize=1.5\hsize}X% 30% of 4\hsize
-            % sum=4.0\hsize for 4 columns
-        }
-
-        \tt \etc      & Continuation logique      & \tt \any  & N'importe quoi \\
-        \tt /\any/    & Expression régulière      & \tt \spc  & Espace obligatoire           \\
-        \cd{type}     & \tt int, long, float... & \cd{name} & \tt /[A-Za-z][A-Za-z0-9\_]+/ \\
-        \cd{value}    & Valeur                    & \cd{NAME} & \tt /[A-Z][A-Z0-9\_]+/       \\
-        \cd{fname} & Chemin de fichier relatif & \cd{expr} & e.g. \tt a + b               \\
-    \end{tabularx}
-    \hrule
-
-    \section*{Différences C/C++}
-    \begin{cppcode}
+\section*{Différences C/C++}
+\begin{cppcode}
 void func();         // n'accepte aucun argument
 int *ip = nullptr;   // Utiliser à la place de NULL
 #include <cstdio>    // Au lieu de <stdio.h> (pas de .h)
+struct { int a; } s = { .a=42 }; // Non portable C++
 \end{cppcode}
 
 \section*{Généralités et spécificités}
@@ -156,7 +140,8 @@ constexpr double pi = 3.14159265358979323846;
 
 // Likely/Unlikely (C++20)
 if (x > 0) [[likely]] { ... } else [[unlikely]] { ... }
-if (likely(x > 0)) { ... } else { ... } // C++23
+// C++23 style (plus concis)
+if (likely(x > 0)) { ... } else { ... }
 
 // Assert (debug uniquement)
 static_assert(sizeof(int) == 4, "int doit faire 4 bytes");
@@ -192,25 +177,26 @@ const string& cbarRef = foo;
 cbarRef += ". Hi!";       // Erreur ! cbarRef est const
 
 string str;
-void func(string& s) { ... }  // Référence standard
-void func(string&& s) { ... } // Référence temporaire
-func(str);                    // Référence standard
-func(foo());                  // Référence temporaire
+void func(string& s) { ... }  // Référence lvalue
+void func(string&& s) { ... } // Référence rvalue
+func(str);                    // Référence lvalue
+func(foo());                  // Référence rvalue
 \end{cppcode}
 
 \section*{Flux / Streams}
 \begin{cppcode}
+// Include <iostream>, <iomanip>
 int i;
 cin >> i;  // Lecture
 cout << "Number: " << i << "\n";         // Format
-cerr << "An error message" << endl; }    // Stderr
+cerr << "An error message" << endl;      // Stderr
 double x = 3.141592;
 cout << std::fixed; // Format décimal fixe
 cout.precision(2);  // 2 chiffres après la virgule
 cout << x << endl;  // Affiche 3.14
 cout << std::scientific; // Format scientifique (3.14e+00)
 cout << std::setw(5) << std::setprecision(3) << x; // %5.3f
-cout << "\n" << std::endl; // préférez \n (pas de flush)
+cout << std::endl;  // Retour à la ligne + flush
 \end{cppcode}
 
 \section*{Enumérations}
@@ -220,7 +206,7 @@ cout << "\n" << std::endl; // préférez \n (pas de flush)
 enum AnimalTypes { Mammals, Birds, Reptiles, Fish };
 AnimalTypes GetAnimalType() { return Reptiles; }
 
-// Enumérations typées (cast implicite en uint_8)
+// Enumérations typées (cast implicite en uint8)
 enum Amphibians : uint8_t { Frogs, Toads=2 };
 
 // Enum fortement typées (pas de cast implicite)
@@ -257,7 +243,7 @@ p<42>(); // The Answer!
 extern "C" { void f(); }    // Si f() compilé dans un obj C
 namespace N { class T {}; } // Cache la classe T dans N
 N::T t;                     // Accès avec opérateur ::
-using namespace N;          // Rend T visible sans préfix
+using namespace N;          // Rend T visible sans préfixe
 using namespace std;        // Pour éviter std::xxx
 \end{cppcode}
 
@@ -378,7 +364,8 @@ std::ostream& operator<<(std::ostream& os, const T& t) {
 \section*{Exceptions}
 
 \begin{cppcode}
-try { // inclure <stdexcept>, <exception>
+// inclure <stdexcept>, <exception>
+try {
    throw std::runtime_error("A problem occured"); }
 catch (const std::exception& ex) {
    std::cout << ex.what(); }
@@ -565,13 +552,11 @@ doggo->bark();
 std::unique_ptr<Dog> dog = std::make_unique<Dog>();
 // Transfert de propriété
 std::unique_ptr<Dog> dog2 = std::move(dog);
-
 // Référence faible (évite cycles)
 // Utilisé comme observateur non possédant
 std::weak_ptr<Dog> weak_dog = doggo;
-if (auto strong_dog = weak_dog.lock()) {
+if (auto strong_dog = weak_dog.lock())
     strong_dog->bark(); // Utilisation sécurisée
-}
 \end{cppcode}
 
 \section*{Gestion mémoire et RAII}
@@ -647,7 +632,6 @@ std::ranges::copy(rng, std::back_inserter(out));
 
 \begin{cppcode}
 // Inclure <span>, <string_view>, <vector>
-
 // std::span : vue non-propriétaire sur un bloc contigu
 // (T[], vector<T>, array<T,N>) n'alloue pas,
 // ne possède pas, "slice" sans copie.
@@ -691,6 +675,28 @@ auto size2(const C& c) { return c.size() * 2; }
 
 static_assert(std::ranges::range<std::vector<int>>);
 static_assert(!std::ranges::range<int>);
+\end{cppcode}
+
+\section*{RTTI}
+
+\begin{cppcode}
+// Include <typeinfo>, <typeindex>
+struct B {}; struct C : B { void f() { cout << "C"; } };
+Base* pc = new C; // Allocation dynamique
+// Vers pointeur : nullptr si échec
+if (auto pd = dynamic_cast<C*>(pc)) { pd->f(); }
+else { /* cast impossible */ }
+// Vers référence : lève std::bad_cast si échec
+try { C& rd = dynamic_cast<C&>(*pc); rd.f(); }
+catch (const std::bad_cast& e) { ... e.what(); }
+// Sur *p ou une référence de base polymorphe -> type dyn.
+const std::type_info& ti_dyn = typeid(pc); // "C" dynam.
+std::cout << ti_dyn.name() << '\n'; // Nom impl.-dépendant
+if (typeid(pc) == typeid(Der)) { / ... */ } // Comp. Type.
+// Stocker des types comme clés
+std::unordered_map<std::type_index, std::string> names;
+names.emplace(std::type_index(typeid(Der)), "Derived");
+std::cout << names.at(typeid(Der)) << '\n';
 \end{cppcode}
 
 \section*{Divers}
