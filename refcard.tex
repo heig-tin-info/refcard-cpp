@@ -190,14 +190,17 @@ const string& cbarRef = foo;
 cbarRef += ". Hi!";       // Erreur ! cbarRef est const
 
 string str;
-void func(string& s) { ... }  // Référence standard
-void func(string&& s) { ... } // Référence temporaire
-func(str);                    // Référence standard
-func(foo());                  // Référence temporaire
+void func(string& s) { ... }       // Référence lvalue
+void func(string&& s) { ... }      // Référence rvalue  
+func(str);                         // Référence lvalue
+func(string("temp"));              // Référence rvalue
 \end{cppcode}
 
 \section*{Flux / Streams}
 \begin{cppcode}
+#include <iostream>
+#include <iomanip>
+
 int i;
 cin >> i;  // Lecture
 cout << "Number: " << i << "\n";         // Format
@@ -236,7 +239,7 @@ template <class T>
 X<int> x{3};                  // Un objet de type X de int
 template <class T, class U=T> // Valeurs par défaut
 
-Box<Box<int> > boxOfBox;  // Template imbriquées
+Box<Box<int>> boxOfBox;   // Templates imbriqués (C++11+)
                           // Espace après > requis en C++03
 
 template<int Y=23> void p() { // Paramètre scalaire
@@ -249,13 +252,13 @@ p<12>(); // You said 12
 p<42>(); // The Answer!
 \end{cppcode}
 
-    \section*{Namespaces}
+\section*{Namespaces}
 
-    \begin{cppcode}
+\begin{cppcode}
 extern "C" { void f(); }    // Si f() compilé dans un obj C
 namespace N { class T {}; } // Cache la classe T dans N
 N::T t;                     // Accès avec opérateur ::
-using namespace N;          // Rend T visible sans préfix
+using namespace N;          // Rend T visible sans préfixe
 using namespace std;        // Pour éviter std::xxx
 \end{cppcode}
 
@@ -376,8 +379,11 @@ std::ostream& operator<<(std::ostream& os, const T& t) {
 \section*{Exceptions}
 
 \begin{cppcode}
-try { // inclure <stdexcept>, <exception>
-   throw std::runtime_error("A problem occured"); }
+#include <stdexcept>
+#include <exception>
+
+try {
+   throw std::runtime_error("A problem occurred"); }
 catch (const std::exception& ex) {
    std::cout << ex.what(); }
 catch (...) {
