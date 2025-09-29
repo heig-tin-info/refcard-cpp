@@ -27,7 +27,7 @@
 
 \renewcommand{\familydefault}{\sfdefault}
 
-\usemintedstyle{trac}
+\usemintedstyle{bw}
 
 \newminted{cpp}{
   fontsize=\footnotesize,
@@ -440,7 +440,7 @@ m.insert(pair<char,int>('Z', 26));
 
 map<char, int>::iterator it; // Itérateur
 for (it=m.begin(); it!=m.end(); ++it)
-    std::cout << it->first << "->" << it->second << ', ';
+    std::cout << it->first << "->" << it->second << ", ";
 
 it = m.find('Z');
 cout << it->second; // Affiche 26
